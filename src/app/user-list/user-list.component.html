@@ -1,0 +1,13 @@
+<div>
+    <h2>User Information</h2>
+    <div class="content-item housing" *ngFor="let user of users">
+      <a href="user/{{user._id}}"><strong>Name:</strong> {{ user.name }}</a>
+      <p>Age:{{ user.age }}</p>
+      <p>Email:{{ user.email }}</p>
+      
+      <a href="user/{{user._id}}"> Edit </a>
+      <button type="button" (click)="onDelete(user._id)">Delete</button>
+      <br>
+      <br>
+      <br>
+  </div>
