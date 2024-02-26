@@ -1,19 +1,19 @@
 
-<div *ngIf="user">
-  <h2>Edit User</h2>
-  <form [formGroup]="editUserForm" (ngSubmit)="onSubmit()">
-    <div>
-      <label for="name">Name:</label>
-      <input type="text" id="name" formControlName="name" [ngModel]="user.name">
-    </div>
-    <div>
-      <label for="age">Age:</label>
-      <input type="number" id="age" formControlName="age" [ngModel]="user.age">
-    </div>
-    <div>
-      <label for="email">Email:</label>
-      <input type="email" id="email" formControlName="email" [ngModel]="user.email">
-    </div>
-    <button type="submit" [disabled]="editUserForm.invalid">Save</button>
-  </form>
+<div *ngIf="user" class="container">
+  <h2>User Info</h2>
+  <br>
+  
+  <a href="user-list" class="btn btn-primary" style="margin-right: 20px;"> Back to user list </a>
+    
+  <a href="auth-user" class="btn btn-primary" style="margin-right: 20px;"> Auth </a>
+  <a href="add-user" class="btn btn-primary" style="margin-right: 20px;"> Registrate </a>
+  <!-- visible with jwt -->
+  <a href="#" class="btn btn-primary" style="margin-right: 20px;"> Log Out </a>
+  
+  <br>
+  <br>
+
+  <p><strong>Name: {{ user.name }}</strong></p>
+  <p>Age:{{ user.age }}</p>
+  <p>Email:{{ user.email }}</p>
 </div>

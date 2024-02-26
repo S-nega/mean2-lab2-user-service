@@ -7,10 +7,10 @@ import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-user',
-  templateUrl: './user.component.html',
-  // styleUrls: ['./user.component.css']
+  templateUrl: './edit-user.component.html',
+  // styleUrls: ['./edit-user.component.css']
 })
-export class UserComponent {
+export class EditUserComponent {
   user: any;
   editUserForm: FormGroup
 
@@ -39,8 +39,32 @@ export class UserComponent {
       }
       else{
         console.log("Error: userId is null")
-        this.router.navigate(['/user-list']);
       }
     });
+  }
+
+  onSubmit(): void {
+    this.route.paramMap.subscribe(params => {
+      const userId = params.get('id'); // Получаем userId из параметров маршрута
+      console.log(this.editUserForm.value.name);
+      if (this.editUserForm.valid && userId != null){
+        const userData = this.editUserForm.value;
+        this.userService.updateUser(userId, userData).subscribe(updatedUser => {
+          console.log('User updated successfully:', updatedUser);
+          this.router.navigate(['/user-list']);
+        });
+      }
+      else{
+        console.log("Error: uncorrect data")
+      }
+    });
+  }
+
+  onDelete(userId: string): void {
+    if (confirm('Вы уверены, что хотите удалить пользователя?')) {
+      this.userService.deleteUser(userId).subscribe(() => {
+        this.router.navigate(['/user-list']); 
+      });
+    }
   }
 }

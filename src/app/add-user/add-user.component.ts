@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { UserService } from '../user.service';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 @Component({
@@ -19,9 +19,10 @@ export class AddUserComponent {
     private router: Router
   ) { 
     this.addUserForm = this.formBuilder.group({
-      name: [''],
-      age: [],
-      email: ['']
+      name: ['', Validators.required],
+      age: [, Validators.required],
+      email: ['', Validators.required],
+      password: ['', Validators.required]
     })
   }
 
@@ -30,8 +31,6 @@ export class AddUserComponent {
       const userData = this.addUserForm.value;
       this.userService.addUser(userData).subscribe(newUser => {
         console.log('User added successfully:', newUser);
-        // this.user = { name: '', age: null, email: '' };
-        
       });
       this.router.navigate(['/user-list']);
     }

@@ -8,18 +8,20 @@ import { AddUserComponent } from './add-user/add-user.component';
 import { Schema } from 'mongoose';
 import { HttpClientModule,  HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
-import { UpdateUserComponent } from './update-user/update-user.component';
+import { AuthUserComponent } from './auth-user/auth-user.component';
 import { UserListComponent } from './user-list/user-list.component';
 
 import { AuthInterceptor } from './auth.interceptor';
+import { EditUserComponent } from './edit-user/edit-user.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     UserComponent,
     AddUserComponent,
-    UpdateUserComponent,
+    AuthUserComponent,
     UserListComponent,
+    EditUserComponent,
   ],
   imports: [
     BrowserModule,

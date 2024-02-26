@@ -4,34 +4,22 @@ var express = require('express');
 var path = require('path');
 const Users = require('./models/users.js');
 const { error } = require('console');
-
+const jwt = require('jsonwebtoken');
 var app = express();
 var express = require('express');
 var path = require('path');
 const mongoose = require('mongoose');
-
+const authMiddleware = require('./middleware/authMiddleware.js');
 const bodyParser = require('body-parser');
 
 var app = express();
 
-
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'jade');
-// app.set('view engine', 'html');
 app.use(express.static(path.join(__dirname, 'lab2-users/dist')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors()); //Разрешение на cors
 app.use(bodyParser.json());
-
-// app.use('/', indexRouter);
-// app.use('/api/tasks', tasksRouter);
-
-//чтобы обрабатывать все запросы, кроме тех, которые начинаются с /api
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, 'views'));
-// });
 
 
 //mongoose connecting
@@ -53,13 +41,54 @@ app.listen(3000, ()=>{
 app.get('/api/users', async(req, res)=>{
   try{
     const users = await Users.find({});
-    console.log(users);
+    // console.log(users);
     res.json(users);
   } catch (error){
     console.log(error)
     res.status(500).json({message: error.message});
   }
 });
+
+//get one user
+app.get('/api/users/:id', async(req, res) => {
+  try {
+      const {id} = req.params;
+      const user = await Users.findById(id);
+
+      // console.log(user);
+      res.json(user);
+
+  } catch (error) {
+      res.status(500).json({message: error.message});
+  }
+})
+
+//authorize user
+app.post('/api/users/auth', async(req, res) => {
+  try{
+      const email = req.body.email;
+      const pass = req.body.password;
+      
+      const user = await Users.findOne({email: email});
+      // console.log(user);
+
+      if (user){
+        if(user.password === pass){
+          const token = jwt.sign({ userId: user._id }, 'secret', { expiresIn: '1h' });
+          console.log('user authorized, ' + token);
+          return res.status(200).json({ message: 'Logged in successfully', token });
+        }
+      }
+      else{
+        res.status(500).json({message: 'Incorrect data'});
+        console.log('Incorrect data');
+      }
+
+  } catch (error){
+      console.log(error);
+      res.status(500).json({message: error.message});
+  }
+})
 
 //add new user
 app.post('/api/users/reg', async(req, res) => {
@@ -68,7 +97,7 @@ app.post('/api/users/reg', async(req, res) => {
       console.log(user);
       // res.status(200).send({user: user})
 
-      // res.status(200).redirect('/api/users');
+      res.status(200).redirect('/api/users');
 
   } catch (error){
       console.log(error)
@@ -76,22 +105,8 @@ app.post('/api/users/reg', async(req, res) => {
   }
 })
 
-//get one user
-app.get('/api/users/:id', async(req, res) => {
-  try {
-      const {id} = req.params;
-      const user = await Users.findById(id);
-
-      console.log(user);
-      res.json(user);
-
-  } catch (error) {
-      res.status(500).json({message: error.message});
-  }
-})
-
 //update user
-app.post('/api/users/update/:id', async(req, res) => {
+app.post('/api/users/update/:id', authMiddleware, async(req, res) => {
   try {
       const {id} = req.params;
       const user = await Users.findByIdAndUpdate(id, req.body);
@@ -114,7 +129,7 @@ app.post('/api/users/update/:id', async(req, res) => {
 })
 
 //delete user
-app.delete('/api/users/del/:id', async(req, res) => {
+app.delete('/api/users/del/:id', authMiddleware, async(req, res) => {
 try{
     const {id} = req.params;
     const user = await Users.findByIdAndDelete(id);
