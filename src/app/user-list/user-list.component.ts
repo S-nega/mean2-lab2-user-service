@@ -30,4 +30,9 @@ export class UserListComponent {
       });
     }
   }
+
+  logout(): void{
+    this.userService.logout();
+    
+  }
 }

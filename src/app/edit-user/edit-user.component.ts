@@ -46,7 +46,6 @@ export class EditUserComponent {
   onSubmit(): void {
     this.route.paramMap.subscribe(params => {
       const userId = params.get('id'); // Получаем userId из параметров маршрута
-      console.log(this.editUserForm.value.name);
       if (this.editUserForm.valid && userId != null){
         const userData = this.editUserForm.value;
         this.userService.updateUser(userId, userData).subscribe(updatedUser => {
@@ -66,5 +65,9 @@ export class EditUserComponent {
         this.router.navigate(['/user-list']); 
       });
     }
+  }
+  
+  logout(): void{
+    this.userService.logout();
   }
 }

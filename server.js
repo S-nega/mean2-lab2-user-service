@@ -110,10 +110,12 @@ app.post('/api/users/update/:id', authMiddleware, async(req, res) => {
   try {
       const {id} = req.params;
       const user = await Users.findByIdAndUpdate(id, req.body);
-      console.log(req.name);
-      console.log(req.age);
-      console.log(req.email);
-
+      console.log("update user/ post")
+      console.log(user);
+      // console.log(req.name);
+      // console.log(req.age);
+      // console.log(req.email);
+//jwt.verify
       if(!user){
           return res.status(404).json({message: `cannot find any user with ID ${id}`})
       }

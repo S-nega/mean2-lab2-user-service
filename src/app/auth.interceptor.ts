@@ -10,16 +10,20 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { catchError, tap } from 'rxjs/operators';
+import { UserService } from './user.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-    constructor(private router: Router) {}
+    constructor(
+      private router: Router,
+      private userService: UserService) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     console.log('Intercepted request:', request);
     
-    const authToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
+    const authToken = this.userService.getAuthToken();
+    console.log("interseptor: " + this.userService.getAuthToken());
     const authRequest = request.clone({
       setHeaders: {
         Authorization: `Bearer ${authToken}`
