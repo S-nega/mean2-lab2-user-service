@@ -1,25 +1,29 @@
 <div class="container">
-    <h2>Users list</h2>
-    <br>
-    
+  <h2>Users list</h2>
+  <br>
+  
+  <div *ngIf="(!isUserAuth())">
     <a href="auth-user" class="btn btn-primary" style="margin-right: 20px;"> Auth </a>
     <a href="add-user" class="btn btn-primary" style="margin-right: 20px;"> Registrate </a>
-    <!-- visible with jwt -->
-    <button (click)="logout()" class="btn btn-primary" style="margin-right: 20px;"> Log Out </button>
-    
-    <br>
-    <br>
-    
-    <div class="content-item" *ngFor="let user of users">
-      <a href="user/{{user._id}}"><strong>Name:</strong> {{ user.name }}</a>
-      <p>Age:{{ user.age }}</p>
-      <p>Email:{{ user.email }}</p>
-      
-      <!-- visible only if it's authorized user's account -->
-      <a href="edit-user/{{user._id}}" class="btn btn-primary" style="margin-right: 20px;"> Edit </a>
-      <button type="button" (click)="onDelete(user._id)" class="btn btn-danger">Delete</button>
+  </div>
+  
+  <button *ngIf="(isUserAuth())" (click)="logout()" class="btn btn-primary" style="margin-right: 20px;"> Log Out </button>
+  <br>
+  <br>
+  
+  <div class="content-item" *ngFor="let user of users">
 
-      <br>
-      <br>
+    <a href="user/{{user._id}}"><strong>Name:</strong> {{ user.name }}</a>
+    
+    <p>Age:{{ user.age }}</p>
+    <p>Email:{{ user.email }}</p>
+
+    <div *ngIf="(getCurrentUserId() == user._id)">
+      <a href="edit-user/{{user._id}}" class="btn btn-primary" style="margin-right: 20px;"> Edit </a>
+      <button type="button" (click)="onDelete(user._id)" class="btn btn-danger">Delete</button>  
       <br>
     </div>
+    
+    <br>
+    <br>
+</div>

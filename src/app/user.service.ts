@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 export class UserService {
   private apiUrl = 'http://localhost:3000/api/users';
   private token: string = '';
+  private currentUserId: string = '';
 
   constructor(
     private http: HttpClient,
@@ -20,9 +21,26 @@ export class UserService {
   }
 
   getAuthToken() {//use everywhere for checking
-    console.log("this.token/getAuthToken: " + this.token);
-    console.log("localStorage: " + localStorage.getItem('token'));
-    return this.token || localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return token;
+  }
+  
+  getCurrentUserId() {//use everywhere for checking
+    var currentUserId = localStorage.getItem('currentUserId');
+    if (currentUserId == null){
+      currentUserId = 'null';
+    }
+    console.log(currentUserId);
+    return currentUserId;      
+  }
+
+  isUserAuth(){
+    var result = true;
+    if(this.getCurrentUserId() == 'null') {
+      result = false;
+    }
+    return result;
   }
 
   getUsers(): Observable<any[]> {
@@ -44,27 +62,17 @@ export class UserService {
     );
   }
 
-  //authorization
-  // authUser(email: string, password: string) {
-  //   return this.http.post(`${this.apiUrl}/auth`, { email, password }).pipe(
-  //     catchError(error => {
-  //       console.error(error.error.message);
-      
-  //       console.error(error.error.message);
-  //       return throwError(error.error.message);
-  //     })
-  //   );
-  // }
-
   authUser(email: string, password: string) {
     return this.http.post<any>(`${this.apiUrl}/auth`, { email, password }).pipe(
       tap(response => {
-        if (response && response.token) {
+        if (response && response.token && response.currentUserId) {
           this.token = response.token;
-          console.log('/service/authUser/response');
+          this.currentUserId = response.currentUserId;
+          // console.log('/service/authUser/response');
           localStorage.setItem('token', this.token);
+          localStorage.setItem('currentUserId', this.currentUserId);
         }
-        console.log('/service/authUser/un response');
+        // console.log('/service/authUser/un response');
       })
     );
   }
@@ -72,8 +80,9 @@ export class UserService {
   logout(){
     console.log("logout");
     this.token = '';
+    this.currentUserId = '';
     localStorage.removeItem('token');
-    // localStorage.removeItem(this.token);
+    localStorage.removeItem('currentUserId');
     this.router.navigate(['/auth-user']);
   }
 
@@ -88,23 +97,15 @@ export class UserService {
 
   updateUser(userId: string, user: any): Observable<any> {
     if (this.getAuthToken()) {
-      console.log("updateUser token !== null")
+      // console.log("updateUser token !== null")
       return this.http.post<any>(`${this.apiUrl}/update/${userId}`, user)
-      // делайте что-то с токеном
     } else {
-      console.log("service.ts/updateuser/token == null")
+      // console.log("service.ts/updateuser/token == null")
       this.router.navigate(['/auth-user']);
       return throwError("error.error.message");//??
-      // обработка ситуации, когда токен отсутствует
     }
     console.log(user);
     return this.http.post<any>(`${this.apiUrl}/update/${userId}`, user)
-    // .pipe(
-    //   catchError(error => {
-    //     console.error(error.error.message);
-    //     return throwError(error.error.message);
-    //   })
-    // );
   }
 
   deleteUser(userId: string): Observable <any> {

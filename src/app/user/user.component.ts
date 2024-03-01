@@ -32,7 +32,10 @@ export class UserComponent {
     this.route.paramMap.subscribe(params => {
 
       const userId = params.get('id'); // Получаем userId из параметров маршрута
-      if (userId != null ){
+      if(userId === this.userService.getCurrentUserId()){
+        this.router.navigate(['/edit-user/' + userId]);
+      }
+      else if (userId != null ){
         this.userService.getOneUser(userId).subscribe((userData: any) => {
           this.user = userData; // Сохраняем данные пользователя
         });
@@ -42,5 +45,14 @@ export class UserComponent {
         this.router.navigate(['/user-list']);
       }
     });
+  }
+
+  
+  logout(): void{
+    this.userService.logout();
+  }
+
+  isUserAuth(): boolean{
+    return this.userService.isUserAuth();
   }
 }

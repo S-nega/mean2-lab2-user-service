@@ -33,6 +33,13 @@ export class UserListComponent {
 
   logout(): void{
     this.userService.logout();
-    
+  }
+
+  isUserAuth(): boolean{
+    return this.userService.isUserAuth();
+  }
+
+  getCurrentUserId(): string{
+    return this.userService.getCurrentUserId();
   }
 }

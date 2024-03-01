@@ -68,15 +68,15 @@ app.post('/api/users/auth', async(req, res) => {
   try{
       const email = req.body.email;
       const pass = req.body.password;
-      
       const user = await Users.findOne({email: email});
-      // console.log(user);
 
       if (user){
         if(user.password === pass){
           const token = jwt.sign({ userId: user._id }, 'secret', { expiresIn: '1h' });
+          const currentUserId = user.id;
           console.log('user authorized, ' + token);
-          return res.status(200).json({ message: 'Logged in successfully', token });
+          console.log('authorized user id, ' + currentUserId);
+          return res.status(200).json({ message: 'Logged in successfully', token, currentUserId });
         }
       }
       else{
@@ -97,7 +97,7 @@ app.post('/api/users/reg', async(req, res) => {
       console.log(user);
       // res.status(200).send({user: user})
 
-      res.status(200).redirect('/api/users');
+      // res.status(200).redirect('/api/users');
 
   } catch (error){
       console.log(error)
@@ -112,10 +112,6 @@ app.post('/api/users/update/:id', authMiddleware, async(req, res) => {
       const user = await Users.findByIdAndUpdate(id, req.body);
       console.log("update user/ post")
       console.log(user);
-      // console.log(req.name);
-      // console.log(req.age);
-      // console.log(req.email);
-//jwt.verify
       if(!user){
           return res.status(404).json({message: `cannot find any user with ID ${id}`})
       }
@@ -123,8 +119,6 @@ app.post('/api/users/update/:id', authMiddleware, async(req, res) => {
       const updatedUser = await Users.findById(id);
       console.log(updatedUser);
       res.status(200).send({user: updatedUser})
-      // res.status(200).redirect('/api/users');  
-
   } catch (error) {
       res.status(500).json({message: error.message});
   }

@@ -2,7 +2,8 @@ const jwt = require('jsonwebtoken');
 
 module.exports = function(req, res, next) {
   // Получаем токен из заголовка Authorization
-  const token = this.userService.GetAuthToken();//in getAuthToken set this token
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1];
 
   console.log('authMidleware: ' + token)
   if (!token) {
@@ -19,7 +20,6 @@ module.exports = function(req, res, next) {
     }
     req.userId = decoded.userId; // Сохраняем идентификатор пользователя в запросе
 
-    // localStorage.setItem('token', token);
     next(); // Продолжаем выполнение цепочки middleware
   });
 };

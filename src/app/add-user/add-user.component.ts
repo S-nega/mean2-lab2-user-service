@@ -11,7 +11,6 @@ import { Router } from '@angular/router';
 })
 export class AddUserComponent {
   addUserForm: FormGroup
-  // newUser: Users = { name: '', age: null, email: '' };
 
   constructor(
     private userService: UserService,
@@ -32,7 +31,7 @@ export class AddUserComponent {
       this.userService.addUser(userData).subscribe(newUser => {
         console.log('User added successfully:', newUser);
       });
-      this.router.navigate(['/user-list']);
+      this.router.navigate(['/auth-user']);
     }
   }
 }
