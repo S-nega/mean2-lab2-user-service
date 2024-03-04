@@ -28,10 +28,17 @@ export class AddUserComponent {
   onSubmit(): void {
     if (this.addUserForm.valid){
       const userData = this.addUserForm.value;
-      this.userService.addUser(userData).subscribe(newUser => {
-        console.log('User added successfully:', newUser);
-      });
+      this.userService.addUser(userData).subscribe(
+        newUser => {
+          console.log('User added successfully:', newUser);
+        },
+        error => {
+          console.error('Error adding user:', error);
+          this.router.navigate(['/add-user']);
+        }
+      );
       this.router.navigate(['/auth-user']);
+
     }
   }
 }

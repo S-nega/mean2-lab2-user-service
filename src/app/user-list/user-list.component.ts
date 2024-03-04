@@ -24,6 +24,7 @@ export class UserListComponent {
   onDelete(userId: string): void {
     if (confirm('Вы уверены, что хотите удалить пользователя?')) {
       this.userService.deleteUser(userId).subscribe(() => {
+        this.logout();
         this.userService.getUsers().subscribe((users: any) => {
           this.users = users;
         });

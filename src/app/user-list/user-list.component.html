@@ -27,3 +27,16 @@
     <br>
     <br>
 </div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+
+  // Пример отправки сообщения на сервер
+  socket.emit('chat message', 'Hello, server!');
+
+  // Обработка полученных сообщений от сервера
+  socket.on('chat message', msg => {
+    console.log('Message from server:', msg);
+  });
+</script>

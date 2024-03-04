@@ -14,6 +14,7 @@ const routes: Routes = [
   { path: 'add-user', component: AddUserComponent },//registration
   { path: 'auth-user', component: AuthUserComponent },
   { path: 'user-list', component: UserListComponent },
+  { path: 'users', loadChildren: () => import('./modules/usermodule').then(m => m.UserModule) },
   
 ];
 

@@ -1,18 +1,21 @@
-var createError = require('http-errors');
 const cors = require("cors");
 var express = require('express');
 var path = require('path');
 const Users = require('./models/users.js');
-const { error } = require('console');
 const jwt = require('jsonwebtoken');
 var app = express();
+const http = require('http');
 var express = require('express');
 var path = require('path');
 const mongoose = require('mongoose');
 const authMiddleware = require('./middleware/authMiddleware.js');
+const dataMiddleware = require('./middleware/dataMiddleware.js');
 const bodyParser = require('body-parser');
+const socketIo = require('socket.io');
 
-var app = express();
+// const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
 
 app.use(express.static(path.join(__dirname, 'lab2-users/dist')));
 app.use(express.json());
@@ -20,6 +23,21 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors()); //Разрешение на cors
 app.use(bodyParser.json());
+
+
+// Настройка обработчиков событий для WebSocket endpoint
+io.on('connection', socket => {
+  console.log('A user connected');
+
+  socket.on('disconnect', () => {
+    console.log('A user disconnected');
+  });
+
+  socket.on('chat message', msg => {
+    console.log('Message from client:', msg);
+    io.emit('chat message', msg); // Отправляем сообщение обратно всем клиентам
+  });
+});
 
 
 //mongoose connecting
@@ -41,7 +59,6 @@ app.listen(3000, ()=>{
 app.get('/api/users', async(req, res)=>{
   try{
     const users = await Users.find({});
-    // console.log(users);
     res.json(users);
   } catch (error){
     console.log(error)
@@ -54,9 +71,7 @@ app.get('/api/users/:id', async(req, res) => {
   try {
       const {id} = req.params;
       const user = await Users.findById(id);
-
-      // console.log(user);
-      res.json(user);
+      res.status(200).json(user);
 
   } catch (error) {
       res.status(500).json({message: error.message});
@@ -74,8 +89,6 @@ app.post('/api/users/auth', async(req, res) => {
         if(user.password === pass){
           const token = jwt.sign({ userId: user._id }, 'secret', { expiresIn: '1h' });
           const currentUserId = user.id;
-          console.log('user authorized, ' + token);
-          console.log('authorized user id, ' + currentUserId);
           return res.status(200).json({ message: 'Logged in successfully', token, currentUserId });
         }
       }
@@ -91,17 +104,14 @@ app.post('/api/users/auth', async(req, res) => {
 })
 
 //add new user
-app.post('/api/users/reg', async(req, res) => {
+app.post('/api/users/reg', dataMiddleware, async(req, res) => {
   try{
       const user = await Users.create(req.body)
       console.log(user);
-      // res.status(200).send({user: user})
-
-      // res.status(200).redirect('/api/users');
-
   } catch (error){
-      console.log(error)
-      res.status(500).json({message: error.message});
+      console.error(error)
+      // return throwError(error.error.message);
+      return res.status(500).json({message: error.message});
   }
 })
 
@@ -134,7 +144,6 @@ try{
       return res.status(404).json({message: `cannot find any user with ID ${id}`})
     }
     res.status(200).send({user: user})
-    // res.status(200).redirect('/api/users');
 
 } catch (error){
     res.status(500).json({message: error.message});

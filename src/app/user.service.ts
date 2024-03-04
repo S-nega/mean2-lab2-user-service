@@ -31,7 +31,6 @@ export class UserService {
     if (currentUserId == null){
       currentUserId = 'null';
     }
-    console.log(currentUserId);
     return currentUserId;      
   }
 
@@ -55,9 +54,18 @@ export class UserService {
   //registration
   addUser(user: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/reg`, user).pipe(
-      catchError(error => {
-        console.error(error.error.message);
-        return throwError(error.error.message);
+      catchError(
+        error => {
+          console.error(error.error.message);
+          return throwError(error.error.message);
+        }),
+      tap(response => {
+        // Дополнительная проверка на успешное выполнение запроса
+        
+        if (response.success) {
+          // Действия при успешном выполнении
+          console.log('User added successfully');
+        }
       })
     );
   }
@@ -68,11 +76,9 @@ export class UserService {
         if (response && response.token && response.currentUserId) {
           this.token = response.token;
           this.currentUserId = response.currentUserId;
-          // console.log('/service/authUser/response');
           localStorage.setItem('token', this.token);
           localStorage.setItem('currentUserId', this.currentUserId);
         }
-        // console.log('/service/authUser/un response');
       })
     );
   }
@@ -97,10 +103,8 @@ export class UserService {
 
   updateUser(userId: string, user: any): Observable<any> {
     if (this.getAuthToken()) {
-      // console.log("updateUser token !== null")
       return this.http.post<any>(`${this.apiUrl}/update/${userId}`, user)
     } else {
-      // console.log("service.ts/updateuser/token == null")
       this.router.navigate(['/auth-user']);
       return throwError("error.error.message");//??
     }
