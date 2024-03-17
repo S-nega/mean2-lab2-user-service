@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { UserService } from '../user.service';
 import { HttpClient } from '@angular/common/http';
+import { tap, map, catchError } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
 
 @Component({
   selector: 'app-file-upload',
@@ -17,16 +19,12 @@ export class FileUploadComponent {
     private userService: UserService,
     ) {}
 
-  ngOnInit() {
+  ngOnInit():void {
     this.userService.getFilesList()
-      .subscribe(
-        files => {
-          this.userService.files = files;
-        },
-        error => {
-          console.error('Failed to get files list.');
-        }
-      );
+    .subscribe((files: any) => {
+      this.files = files;
+      // console.log("file-uploading files: " + files[0].filename);
+    })
   }
 
   onSubmit() {
@@ -34,29 +32,48 @@ export class FileUploadComponent {
     const file = fileInput.files?.[0];
     if (!file) {
       this.message = 'Please select a file.';
+      console.log("no file")
       return;
+    }
+    else{
+      console.log("file = " + file)
     }
 
     const formData = new FormData();
     formData.append('file', file);
 
-    this.http.post<any>('http://localhost:3000/upload', formData).subscribe(
-      response => {
-        this.message = 'File uploaded successfully.';
-      },
-      error => {
-        this.message = 'Failed to upload file.';
-      }
+    this.http.post<any>('http://localhost:3000/upload', formData).pipe(
+      catchError(
+        error => {
+          console.error(error.error.message);
+          return throwError(error.error.message);
+        }),
+      tap(response => {
+        // Дополнительная проверка на успешное выполнение запроса
+        
+        if (response.success) {
+          // Действия при успешном выполнении
+          console.log('User added successfully');
+        }
+      })
     );
+    // .subscribe(
+    //   response => {
+    //     this.message = 'File uploaded successfully.';
+    //   },
+    //   error => {
+    //     this.message = 'Failed to upload file.';
+    //   }
+    // );
   }
 
-  deleteFile(filename: string) {
+  deleteFile(filename: string): void {
     this.userService.deleteFile(filename).subscribe(
       response => {
         console.log('File deleted successfully.');
         this.userService.getFilesList().subscribe(
           files => {
-            this.userService.files = files;
+            this.files = files;
           },
           error => {
             console.error('Failed to get files list.');

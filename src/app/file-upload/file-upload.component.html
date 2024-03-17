@@ -10,7 +10,7 @@
 <h2>Uploaded Files</h2>
 <ul>
     <li *ngFor="let file of files">
-    {{ file }}
-    <button (click)="deleteFile(file)">Delete</button>
+    {{ file.key }}
+    <button (click)="deleteFile(file.key)">Delete</button>
   </li>
 </ul>

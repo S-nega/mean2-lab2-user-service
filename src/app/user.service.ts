@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient,  HttpHeaders } from '@angular/common/http';
-import { tap } from 'rxjs/operators';
+import { tap, map, catchError } from 'rxjs/operators';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 
 @Injectable({
@@ -13,7 +12,7 @@ export class UserService {
   private token: string = '';
   private currentUserId: string = '';
   
-  files: string[] = [];
+  // files: string[] = [];
 
   constructor(
     private http: HttpClient,
@@ -136,16 +135,43 @@ export class UserService {
     // );
   }
   
-  getFilesList() {
-    return this.http.get<string[]>('http://localhost:3000/upload')
-    // .subscribe(
-    //   files => {
-    //     this.files = files;
-    //   },
-    //   error => {
-    //     console.error('Failed to get files list.');
-    //   }
-    // );
-  }
-  
+  // getFilesList(): Observable<any[]> {
+  //   return this.http.get<any>('http://localhost:3000/upload').pipe(
+  //     map((response: any) => {
+  //       if (Array.isArray(response)) {
+  //         return response;
+  //       } else if (response && response.files) {
+  //         return response.files;
+  //       } else {
+  //         throw new Error('Invalid response format');
+  //       }
+  //     }),
+  //     catchError(error => {
+  //       console.error(error.error.message);
+  //       return throwError(error.error.message);
+  //     })
+  //   );
+  // }
+  getFilesList(): Observable<any[]> {
+    return this.http.get<any>('http://localhost:3000/upload').pipe(
+      map((response: any) => {
+        if (!response) {
+          throw new Error('Empty response');
+        }
+
+        if (Array.isArray(response)) {
+          return response;
+        } else if (response && response.files) {
+          return response.files;
+        } else {
+          throw new Error('Invalid response format');
+        }
+      }),
+      catchError(error => {
+        console.error(error.message);
+        return throwError('Error fetching files');
+      })
+    );
+}
+
 }
