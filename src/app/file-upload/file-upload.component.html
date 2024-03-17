@@ -1,0 +1,16 @@
+<h2>File Upload</h2>
+<form (ngSubmit)="onSubmit()" enctype="multipart/form-data">
+  <input type="file" name="file" #fileInput />
+  <button type="submit">Upload File</button>
+</form>
+<div *ngIf="message">{{ message }}</div>
+
+<br>
+<br>
+<h2>Uploaded Files</h2>
+<ul>
+    <li *ngFor="let file of files">
+    {{ file }}
+    <button (click)="deleteFile(file)">Delete</button>
+  </li>
+</ul>

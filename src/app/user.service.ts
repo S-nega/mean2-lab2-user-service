@@ -12,6 +12,8 @@ export class UserService {
   private apiUrl = 'http://localhost:3000/api/users';
   private token: string = '';
   private currentUserId: string = '';
+  
+  files: string[] = [];
 
   constructor(
     private http: HttpClient,
@@ -120,4 +122,30 @@ export class UserService {
       })
     );
   }
+
+  deleteFile(filename: string) {
+    return this.http.delete(`http://localhost:3000/upload/${filename}`)
+    // .subscribe(
+    //   response => {
+    //     console.log('File deleted successfully.');
+    //     this.getFilesList(); // Обновляем список файлов после удаления
+    //   },
+    //   error => {
+    //     console.error('Failed to delete file.');
+    //   }
+    // );
+  }
+  
+  getFilesList() {
+    return this.http.get<string[]>('http://localhost:3000/upload')
+    // .subscribe(
+    //   files => {
+    //     this.files = files;
+    //   },
+    //   error => {
+    //     console.error('Failed to get files list.');
+    //   }
+    // );
+  }
+  
 }

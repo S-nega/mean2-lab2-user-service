@@ -6,6 +6,7 @@ import { AuthUserComponent } from './auth-user/auth-user.component';
 import { UserListComponent } from './user-list/user-list.component';
 import { EditUserComponent } from './edit-user/edit-user.component';
 import { AuthGuard } from './auth.guard';
+import { FileUploadComponent } from './file-upload/file-upload.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'user-list', pathMatch: 'full' },
@@ -14,8 +15,8 @@ const routes: Routes = [
   { path: 'add-user', component: AddUserComponent },//registration
   { path: 'auth-user', component: AuthUserComponent },
   { path: 'user-list', component: UserListComponent },
+  { path: 'file-upload', component: FileUploadComponent },
   { path: 'users', loadChildren: () => import('./modules/usermodule').then(m => m.UserModule) },
-  
 ];
 
 @NgModule({
