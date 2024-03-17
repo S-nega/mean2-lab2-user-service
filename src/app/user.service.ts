@@ -12,8 +12,6 @@ export class UserService {
   private token: string = '';
   private currentUserId: string = '';
   
-  // files: string[] = [];
-
   constructor(
     private http: HttpClient,
     private router: Router
@@ -124,54 +122,41 @@ export class UserService {
 
   deleteFile(filename: string) {
     return this.http.delete(`http://localhost:3000/upload/${filename}`)
-    // .subscribe(
-    //   response => {
-    //     console.log('File deleted successfully.');
-    //     this.getFilesList(); // Обновляем список файлов после удаления
-    //   },
-    //   error => {
-    //     console.error('Failed to delete file.');
-    //   }
-    // );
-  }
-  
-  // getFilesList(): Observable<any[]> {
-  //   return this.http.get<any>('http://localhost:3000/upload').pipe(
-  //     map((response: any) => {
-  //       if (Array.isArray(response)) {
-  //         return response;
-  //       } else if (response && response.files) {
-  //         return response.files;
-  //       } else {
-  //         throw new Error('Invalid response format');
-  //       }
-  //     }),
-  //     catchError(error => {
-  //       console.error(error.error.message);
-  //       return throwError(error.error.message);
-  //     })
-  //   );
-  // }
-  getFilesList(): Observable<any[]> {
-    return this.http.get<any>('http://localhost:3000/upload').pipe(
-      map((response: any) => {
-        if (!response) {
-          throw new Error('Empty response');
-        }
-
-        if (Array.isArray(response)) {
-          return response;
-        } else if (response && response.files) {
-          return response.files;
-        } else {
-          throw new Error('Invalid response format');
-        }
-      }),
+    .pipe(
       catchError(error => {
-        console.error(error.message);
-        return throwError('Error fetching files');
+        console.error(error.error.message);
+        return throwError(error.error.message);
       })
     );
-}
+  }
 
+  uploadFile(file: any): Observable<any> {
+    console.log("user-service: ");
+    return this.http.post<any>('http://localhost:3000/upload', file).pipe(
+      catchError(
+        error => {
+          console.error(error.error.message);
+          return throwError(error.error.message);
+        }),
+      tap(response => {
+        console.log("user-service: ");
+
+        // Дополнительная проверка на успешное выполнение запроса
+        
+        if (response.success) {
+          // Действия при успешном выполнении
+          console.log('file added successfully');
+        }
+      })
+    );
+  }
+
+  getFilesList(): Observable<any[]> {
+    return this.http.get<any[]>('http://localhost:3000/upload').pipe(
+      catchError(error => {
+        console.error(error.error.message);
+        return throwError(error.error.message);
+      })
+    )
+  }
 }

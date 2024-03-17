@@ -136,7 +136,7 @@ function fetchDataFromDatabase(callback) {
 //file downloading
 app.post('/upload', upload.single('file'), async (req, res) => {
   const file = req.file;
-  console.log("uploading...")
+  console.log("server... ");
 
   if (!file) {
     return res.status(400).send('No file uploaded.');
@@ -154,18 +154,20 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     await s3.upload(params).promise();
     fs.unlinkSync(file.path); // Удаляем временный файл
 
-    res.status(200).send(file.filename + " uploaded success. path = " + file.path);
+    const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.amazonaws.com/${file.filename}`;
+    res.status(200).json({ message: 'File uploaded to S3.', fileUrl });
   } catch (err) {
     console.error(err);
     res.status(500).send('Failed to upload file to S3.');
   }
 });
 
-app.delete('/upload/:filename', async (req, res) => {
-  const { filename } = req.params;
-  console.log("filename = " + filename);
+
+app.delete('/upload/:key', async (req, res) => {
+  const { key } = req.params;
+  console.log("key = " + key);
   // Удаление файла с сервера
-  fs.unlink(`uploads/${filename}`, (err) => {
+  fs.unlink(`uploads/${key}`, (err) => {
     if (err) {
       console.error('Failed to delete file:', err);
       return;
@@ -176,23 +178,12 @@ app.delete('/upload/:filename', async (req, res) => {
   // Удаление файла из облачного хранилища
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: filename
+    Key: key
   };
   await s3.deleteObject(params).promise();
 
   res.send('File deleted.');
 });
-
-
-// app.get('/upload', async (req, res) => {
-//   const params = {
-//     Bucket: process.env.AWS_BUCKET_NAME,
-//   };
-  
-//   const files = await s3.listObjectsV2(params).promise();
-  
-//   res.json(files);
-// });
 
 app.get('/upload', async (req, res) => {
   try {
@@ -210,7 +201,7 @@ app.get('/upload', async (req, res) => {
         Size: item.Size,
       };
     });
-
+    // console.log("files: " + files[0].Key);
     res.json(files);
   } catch (error) {
     console.error(error);

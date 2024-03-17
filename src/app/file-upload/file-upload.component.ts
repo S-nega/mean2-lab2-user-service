@@ -3,6 +3,8 @@ import { UserService } from '../user.service';
 import { HttpClient } from '@angular/common/http';
 import { tap, map, catchError } from 'rxjs/operators';
 import { Observable, throwError } from 'rxjs';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-file-upload',
@@ -10,80 +12,64 @@ import { Observable, throwError } from 'rxjs';
 })
 
 export class FileUploadComponent {
+  uploadFileForm: FormGroup
 
+  selectedFile: File | null = null;
   message: string = '';
   files: any[] = []
 
   constructor(
     private http: HttpClient,
     private userService: UserService,
-    ) {}
+    private router: Router,
+    private formBuilder: FormBuilder,
+    ) {
+      this.uploadFileForm = this.formBuilder.group({
+        Key: [''],
+      })
+    }
 
   ngOnInit():void {
     this.userService.getFilesList()
     .subscribe((files: any) => {
       this.files = files;
-      // console.log("file-uploading files: " + files[0].filename);
+      console.log("file-uploading files: " + files[0].Key);
     })
   }
 
   onSubmit() {
-    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-    const file = fileInput.files?.[0];
-    if (!file) {
-      this.message = 'Please select a file.';
-      console.log("no file")
+    if (!this.selectedFile) {
+      console.error('No file selected');
       return;
     }
-    else{
-      console.log("file = " + file)
-    }
-
+  
     const formData = new FormData();
-    formData.append('file', file);
-
-    this.http.post<any>('http://localhost:3000/upload', formData).pipe(
-      catchError(
+    formData.append('file', this.selectedFile, this.selectedFile.name); // добавляем файл в FormData
+  
+    this.http.post('http://localhost:3000/upload', formData)
+      .subscribe(
+        response => {
+          console.log('File uploaded successfully:', response);
+          this.router.navigate(['/file-upload']);
+        },
         error => {
-          console.error(error.error.message);
-          return throwError(error.error.message);
-        }),
-      tap(response => {
-        // Дополнительная проверка на успешное выполнение запроса
-        
-        if (response.success) {
-          // Действия при успешном выполнении
-          console.log('User added successfully');
+          console.error('Error uploading file:', error);
         }
-      })
-    );
-    // .subscribe(
-    //   response => {
-    //     this.message = 'File uploaded successfully.';
-    //   },
-    //   error => {
-    //     this.message = 'Failed to upload file.';
-    //   }
-    // );
+      );
+  }
+  
+
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files?.[0];
   }
 
-  deleteFile(filename: string): void {
-    this.userService.deleteFile(filename).subscribe(
-      response => {
-        console.log('File deleted successfully.');
-        this.userService.getFilesList().subscribe(
-          files => {
-            this.files = files;
-          },
-          error => {
-            console.error('Failed to get files list.');
-          }
-        );
-      },
-      error => {
-        console.error('Failed to delete file.');
-      }
-    );
+  deleteFile(Key: string): void {
+    if (confirm('Вы уверены, что хотите удалить файл?')) {
+      this.userService.deleteFile(Key).subscribe(() => {
+        this.userService.getFilesList().subscribe((files: any) => {
+          this.files = files;
+        });
+      });
+    }
   }
-
 }
