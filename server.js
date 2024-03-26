@@ -22,6 +22,7 @@ const aws = require('aws-sdk');
 const dotenv = require('dotenv');
 const fs = require('fs');
 // const { Storage } = require('@google-cloud/storage');
+const { sendEmail } = require('./utils/emailModul.js');
 
 dotenv.config();
 
@@ -228,6 +229,7 @@ app.get('/api/users/:id', async(req, res) => {
       const {id} = req.params;
       // getCachedData(id, )
       const user = await Users.findById(id);
+      console.log(user);
       res.status(200).json(user);
 
   } catch (error) {
@@ -265,6 +267,9 @@ app.post('/api/users/reg', dataMiddleware, async(req, res) => {
   try{
       const user = await Users.create(req.body)
       console.log(user);
+      const email = req.body.email;
+      await sendEmail(email, 'Registration Successful', 'You have successfully registered.');
+      // res.send('User registered successfully');
   } catch (error){
       console.error(error)
       // return throwError(error.error.message);

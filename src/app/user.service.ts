@@ -62,6 +62,9 @@ export class UserService {
         // Дополнительная проверка на успешное выполнение запроса
         
         if (response.success) {
+          // const email = req.body.email;
+          // await sendEmail(email, 'Registration Successful', 'You have successfully registered.');
+          // res.send('User registered successfully');
           // Действия при успешном выполнении
           console.log('User added successfully');
         }
