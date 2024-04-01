@@ -28,6 +28,7 @@ dotenv.config();
 
 const server = http.createServer(app);
 const io = socketIo(server);
+const MAX_FAILED_ATTEMPTS = 5;
 
 const s3 = new aws.S3({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -243,17 +244,48 @@ app.post('/api/users/auth', async(req, res) => {
       const email = req.body.email;
       const pass = req.body.password;
       const user = await Users.findOne({email: email});
+      console.log(Date.now());
+      console.log("lockUntil " + user.lockUntil);
 
       if (user){
+        // Проверка на количество попыток ввода пароля
+
+        if (user.lockUntil && user.lockUntil > Date.now()) {
+          // Аккаунт заблокирован, показать сообщение об этом
+          console.log('Account locked. Try again later. ' + user.lockUntil)
+          return res.status(401).json({ message: 'Account locked. Try again later.' });
+        }
+        else{
+          await Users.updateOne({ email: email }, { $set: { lockUntil: 0 } });
+        }
+
+        if (user.failedLoginAttempts >= MAX_FAILED_ATTEMPTS && user.lockUntil < Date.now()) {
+          console.log('Too many failed login attempts. Account locked.')
+          await Users.updateOne({ email: email }, { $set: { lockUntil: Date.now() + 60 * 1000 } });
+          await Users.updateOne({ email: email }, { $set: { failedLoginAttempts: 4 } });
+          // console.log(user);
+          return res.status(401).json({ message: 'Too many failed login attempts. Account locked.' });
+        }
+        
+
+        // Проверка пароля
         if(user.password === pass){
+          // Сброс счетчика неудачных попыток
+          await Users.updateOne({ email: email }, { $set: { failedLoginAttempts: 0 } });
+
           const token = jwt.sign({ userId: user._id }, 'secret', { expiresIn: '1h' });
           const currentUserId = user.id;
           return res.status(200).json({ message: 'Logged in successfully', token, currentUserId });
+        } else {
+          // Увеличение счетчика неудачных попыток
+          await Users.updateOne({ email: email }, { $inc: { failedLoginAttempts: 1 } });
+          console.log("Incorrect password: " + email + " " + user.failedLoginAttempts)
+          return res.status(401).json({ message: 'Incorrect password' });
         }
       }
       else{
-        res.status(500).json({message: 'Incorrect data'});
-        console.log('Incorrect data');
+        res.status(500).json({message: 'Incorrect email'});
+        console.log('Incorrect email');
       }
 
   } catch (error){
@@ -262,12 +294,17 @@ app.post('/api/users/auth', async(req, res) => {
   }
 })
 
+
 //add new user
 app.post('/api/users/reg', dataMiddleware, async(req, res) => {
   try{
       const user = await Users.create(req.body)
+      
       console.log(user);
       const email = req.body.email;
+      
+      await Users.updateOne({ email: email }, { $set: { failedLoginAttempts: 0 } });
+
       await sendEmail(email, 'Registration Successful', 'You have successfully registered.');
       // res.send('User registered successfully');
   } catch (error){

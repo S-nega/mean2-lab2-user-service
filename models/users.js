@@ -14,6 +14,12 @@ const usersSchema = new mongoose.Schema(
     },
     password: {
       type: String,
+    },
+    failedLoginAttempts: {
+      type: Number,
+    },
+    lockUntil: {
+      type: Number,
     }
   }
 );
