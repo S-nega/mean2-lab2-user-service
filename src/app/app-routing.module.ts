@@ -7,9 +7,13 @@ import { UserListComponent } from './user-list/user-list.component';
 import { EditUserComponent } from './edit-user/edit-user.component';
 import { AuthGuard } from './auth.guard';
 import { FileUploadComponent } from './file-upload/file-upload.component';
+import { NewsComponent } from './news/news.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'user-list', pathMatch: 'full' },
+  { path: 'news/:city', component: NewsComponent },
+  { path: 'news', component: NewsComponent },
+  { path: 'news/:id', component: NewsComponent },
   { path: 'user/:id', component: UserComponent },
   { path: 'edit-user/:id', component: EditUserComponent, canActivate: [AuthGuard]  },
   { path: 'add-user', component: AddUserComponent },//registration

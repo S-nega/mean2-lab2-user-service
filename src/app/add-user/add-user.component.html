@@ -1,10 +1,28 @@
-<div class="container">
+<div class="container" style="margin: 20px 10% 0 10%; width: 80%; justify-content: center;">
+  
+  <div style="display: flex; flex-wrap: nowrap; justify-content: space-between;">
+    <div style="display: flex; justify-content: left;">
+      <a routerLink="/user-list"class="btn btn-primary" style="margin-right: 20px;">Users List</a>
+      <a routerLink="/file-upload"class="btn btn-primary" style="margin-right: 20px;">File Upload</a>
+      <a routerLink="/news" class="btn btn-primary" style="margin-right: 20px;">News</a>
+    </div>
+  
+    <br>
+    <br>
+  
+    <div style="display: flex; justify-content: right;">
+      <div *ngIf="(!isUserAuth())">
+        <a href="auth-user" class="btn btn-primary"> Auth </a>
+      </div>
+      <div *ngIf="(isUserAuth())">
+        <button *ngIf="(isUserAuth())" (click)="logout()" class="btn btn-primary"> Log Out </button>
+      </div>
+    </div>
+
+  </div>
+  <br>
+  
   <h2>Registration</h2>
-  <br>
-  <a href="user-list" class="btn btn-primary" style="margin-right: 20px;"> Back to user list </a>
-  <a href="auth-user" class="btn btn-primary" style="margin-right: 20px;"> Auth </a>
-  <br>
-  <br>
   <form [formGroup]="addUserForm" (ngSubmit)="onSubmit()">
     <div class="form-group">
       <label for="name">Name:</label>

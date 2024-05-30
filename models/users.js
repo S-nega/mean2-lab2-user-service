@@ -15,6 +15,9 @@ const usersSchema = new mongoose.Schema(
     password: {
       type: String,
     },
+    news:{
+      type:[String],
+    },
     failedLoginAttempts: {
       type: Number,
     },

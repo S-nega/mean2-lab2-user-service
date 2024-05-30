@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 })
 export class UserService {
   private apiUrl = 'http://localhost:3000/api/users';
+  private newsUrl = 'http://localhost:3000/api/news';
   private token: string = '';
   private currentUserId: string = '';
   
@@ -40,6 +41,80 @@ export class UserService {
     }
     return result;
   }
+
+  getNews(city: string): Observable<any> {
+    console.log("getNews");
+    return this.http.get<any>(`http://localhost:3000/api/news/news/${city}`)//;//4000
+    // .pipe(
+    //   catchError(error => {
+    //     console.error(error.error.message);
+    //     return throwError(error.error.message);
+    //   })
+    // );
+  }
+
+  // getTasks(): Observable<any[]> {
+  //   return this.http.get<any[]>(this.tasksUrl).pipe(
+  //     catchError(error => {
+  //       console.error(error.error.message);
+  //       return throwError(error.error.message);
+  //     })
+  //   );
+  // }
+
+  // //registration
+  // addTask(task: any): Observable<any> {
+  //   return this.http.post<any>(`${this.tasksUrl}/add`, task).pipe(
+  //     catchError(
+  //       error => {
+  //         console.error(error.error.message);
+  //         return throwError(error.error.message);
+  //       }),
+  //     tap(response => {
+  //       // Дополнительная проверка на успешное выполнение запроса
+        
+  //       if (response.success) {
+  //         // const email = req.body.email;
+  //         // await sendEmail(email, 'Registration Successful', 'You have successfully registered.');
+  //         // res.send('User registered successfully');
+  //         // Действия при успешном выполнении
+  //         console.log('User added successfully');
+  //       }
+  //     })
+  //   );
+  // }
+
+
+  // addUserToFriend(userId: string){
+  //   if(this.getCurrentUserId() == 'null') {
+  //     this.getCurrentUserId().friends.push(userId);
+  //     await currentUser.save();
+  //   }
+  // } 
+
+  // addUserToFriend(userId: string){
+  //   if(this.getCurrentUserId() != 'null') {
+  //     return this.http.post<any>(`${this.apiUrl}/addFriend`, this.currentUserId).pipe(//, userId
+  //       catchError(
+  //         error => {
+  //           console.error(error.error.message);
+  //           return throwError(error.error.message);
+  //         })
+  //         // ,
+  //       // tap(response => {
+  //       //   // Дополнительная проверка на успешное выполнение запроса
+          
+  //       //   // if (response.success) {
+  //       //   //   // const email = req.body.email;
+  //       //   //   // await sendEmail(email, 'Registration Successful', 'You have successfully registered.');
+  //       //   //   // res.send('User registered successfully');
+  //       //   //   // Действия при успешном выполнении
+  //       //   //   console.log('Friend added successfully');
+  //       //   // }
+  //       // })
+  //     );
+  //   }
+  // }
 
   getUsers(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl).pipe(

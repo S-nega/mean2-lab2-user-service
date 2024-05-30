@@ -32,6 +32,10 @@ export class UserListComponent {
     }
   }
 
+  // addToFriend(userId: string): void{
+  //   this.userService.addUserToFriend(userId);
+  // }
+
   logout(): void{
     this.userService.logout();
   }

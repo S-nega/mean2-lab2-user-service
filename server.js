@@ -1,21 +1,28 @@
 const cors = require("cors");
-var express = require('express');
-var path = require('path');
-const Users = require('./models/users.js');
 const jwt = require('jsonwebtoken');
+const express = require('express');
 const app = express();
 const http = require('http');
-var express = require('express');
 var path = require('path');
 const mongoose = require('mongoose');
-const authMiddleware = require('./middleware/authMiddleware.js');
-const dataMiddleware = require('./middleware/dataMiddleware.js');
 const bodyParser = require('body-parser');
 const socketIo = require('socket.io');
 const redis = require('redis');
+
+
+//links
+const Users = require('./models/users.js');
+const authMiddleware = require('./middleware/authMiddleware.js');
+const dataMiddleware = require('./middleware/dataMiddleware.js');
+
+//router
+const newsRouter = require('./routes/news')
+// const usersRouter = require('./routes/users')
+
 //cache
 const Memcached = require('memcached');
 const memcached = new Memcached('localhost:11211');
+
 //uplpad files
 const multer = require('multer');
 const aws = require('aws-sdk');
@@ -45,6 +52,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors()); //Разрешение на cors
 app.use(bodyParser.json());
 
+app.use('/api/news', newsRouter);
+
 
 // Настройка обработчиков событий для WebSocket endpoint
 io.on('connection', socket => {
@@ -59,6 +68,41 @@ io.on('connection', socket => {
     io.emit('chat message', msg); // Отправляем сообщение обратно всем клиентам
   });
 });
+
+//apollo, graphQL
+const { ApolloServer, gql } = require('apollo-server-express');
+const typeDefs = gql`
+  type Query {
+    getWeatherByCityName(cityName: String!): Weather
+  }
+
+  type Weather {
+    cityName: String!
+    temperature: Float!
+    description: String!
+  }
+`;
+
+const resolvers = {
+  Query: {
+    getWeatherByCityName: async (_, { cityName }) => {
+      try {
+        console.log("server.js resolves");
+        const API_KEY = 'a3a57c49760152eb5e48acf5527cc76c'
+        const response = await axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${API_KEY}&units=metric`);
+        const weatherData = response.data;
+        return {
+          cityName: weatherData.name,
+          temperature: weatherData.main.temp,
+          description: weatherData.weather[0].description,
+        };
+      } catch (error) {
+        console.error('Error fetching weather data:', error);
+        // throw new Error('Failed to fetch weather data');
+      }
+    },
+  },
+};
 
 
 //mongoose connecting
@@ -75,64 +119,22 @@ app.listen(3000, ()=>{
   console.log('listen port 3000')
 });
 
+async function startApolloServer() {
+  console.log("Apolloserver");
+  const server = new ApolloServer({ typeDefs, resolvers });
+  await server.start();
 
-// Функция для получения данных из кэша или из базы данных
-function getData(callback) {
-  console.log("try to get data function")
-  memcached.get('users', (err, users) => {
-    if (err) {
-      console.log("error in memorycache")
-      fetchDataFromDatabase((err, newUsers) => {
-        if (err) {
-          console.log("error in database")
-          return callback(err);
-        }
+  server.applyMiddleware({ app });
 
-        // Сохраняем полученные данные в кэше
-        memcached.set('users', newUsers, 3600, (err) => {
-          if (err) {
-            console.error('Failed to save users to cache:', err);
-          }
-        });
-
-        callback(null, newUsers);
-      });
-      // return callback(err);
-    }
-    console.log("memcached get");
-    if (users) {
-      // Данные найдены в кэше
-      console.log("users is finded");
-      callback(null, users);
-    } else {
-      // Данные не найдены в кэше, получаем их из базы данных
-      fetchDataFromDatabase((err, newUsers) => {
-        if (err) {
-          console.log("error in database")
-          return callback(err);
-        }
-
-        // Сохраняем полученные данные в кэше
-        memcached.set('users', newUsers, 3600, (err) => {
-          if (err) {
-            console.error('Failed to save users to cache:', err);
-          }
-        });
-
-        callback(null, newUsers);
-      });
-    }
+  const PORT = process.env.PORT || 4000;
+  app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}${server.graphqlPath}`);
   });
 }
 
-// Функция для получения данных из базы данных (замените эту функцию на свою логику получения данных из базы данных)
-function fetchDataFromDatabase(callback) {
-  // Замените этот код на свою логику получения данных из базы данных
-  const newUsers = Users.find({});
-  console.log(newUsers);
-  callback(null, newUsers);
-}
+startApolloServer();
 
+///////////////////////////////////////////////////////////////////////////////////////////////
 
 
 //file downloading
@@ -164,7 +166,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
-
+//file delete
 app.delete('/upload/:key', async (req, res) => {
   const { key } = req.params;
   console.log("key = " + key);
@@ -187,6 +189,7 @@ app.delete('/upload/:key', async (req, res) => {
   res.send('File deleted.');
 });
 
+//file get
 app.get('/upload', async (req, res) => {
   try {
     const params = {
@@ -210,7 +213,6 @@ app.get('/upload', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 
 
 //get all users
@@ -294,8 +296,24 @@ app.post('/api/users/auth', async(req, res) => {
   }
 })
 
+//add user to friend
+app.post('/api/users/addFriend/:currentUserId/:friendId', dataMiddleware, async(req, res) => {
+  try{
+    const {currentUserId} = req.params.currentUserId;
+    const {friendId} = req.params.friendId;
+    const user = await Users.findByIdAndUpdate(currentUserId, friendId);
+      
+    console.log(user);
+    await Users.updateOne({ email: email }, { $set: { failedLoginAttempts: 0 } });
+    res.send('Friend added successfully');
+  } catch (error){
+      console.error(error)
+      // return throwError(error.error.message);
+      return res.status(500).json({message: error.message});
+  }
+})
 
-//add new user
+//add new user / registration
 app.post('/api/users/reg', dataMiddleware, async(req, res) => {
   try{
       const user = await Users.create(req.body)

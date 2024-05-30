@@ -1,22 +1,31 @@
-<div class="container">
+<div class="container" style="margin: 20px 10% 0 10%; width: 80%; justify-content: center;">
+  
+  <div style="display: flex; flex-wrap: nowrap; justify-content: space-between;">
+    <div style="display: flex; justify-content: left;">
+      <a routerLink="/file-upload"class="btn btn-primary" style="margin-right: 20px;">File Upload</a>
+      <a routerLink="/news" class="btn btn-primary" style="margin-right: 20px;">News</a>
+    </div>
+  
+    <br>
+    <br>
+  
+    <div style="display: flex; justify-content: right;">
+      <div *ngIf="(!isUserAuth())">
+        <a href="auth-user" class="btn btn-primary" style="margin-right: 20px;"> Auth </a>
+        <a href="add-user" class="btn btn-primary"> Registrate </a>
+      </div>
+      <div *ngIf="(isUserAuth())">
+        <button *ngIf="(isUserAuth())" (click)="logout()" class="btn btn-primary"> Log Out </button>
+      </div>
+    </div>
+
+  </div>
+  <br>
+  
   <h2>Users list</h2>
   <br>
   
-  <div *ngIf="(!isUserAuth())">
-    <a href="auth-user" class="btn btn-primary" style="margin-right: 20px;"> Auth </a>
-    <a href="add-user" class="btn btn-primary" style="margin-right: 20px;"> Registrate </a>
-  </div>
-  
-  <button *ngIf="(isUserAuth())" (click)="logout()" class="btn btn-primary" style="margin-right: 20px;"> Log Out </button>
-
-  <br>
-  <br>
-  <a routerLink="/file-upload" routerLinkActive="active">File Upload</a>
-
-  <br>
-  <br>
-  
-  <div class="content-item" *ngFor="let user of users">
+  <div class="content-item" *ngFor="let user of users" style="border: #777 solid 1.5px; border-radius: 10px; padding: 20px; padding-right: 0; margin-bottom: 20px;">
 
     <a href="user/{{user._id}}"><strong>Name:</strong> {{ user.name }}</a>
     
@@ -26,12 +35,15 @@
     <div *ngIf="(getCurrentUserId() == user._id)">
       <a href="edit-user/{{user._id}}" class="btn btn-primary" style="margin-right: 20px;"> Edit </a>
       <button type="button" (click)="onDelete(user._id)" class="btn btn-danger">Delete</button>  
-      <br>
     </div>
-    
-    <br>
-    <br>
+
+    <!-- <div *ngIf="(getCurrentUserId() != user._id)">
+      <a href="add-friend/{{user._id}}" class="btn btn-primary" style="margin-right: 20px;"> Edit </a>
+      <button type="button" (click)="addToFriend(user._id)" class="btn btn-primary">Add to Friend</button>  
+      <br>
+    </div> -->
 </div>
+<br>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>

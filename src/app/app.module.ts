@@ -6,15 +6,16 @@ import { HttpClientModule,  HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AuthInterceptor } from './auth.interceptor';
 import { FileUploadComponent } from './file-upload/file-upload.component';
+import { NewsComponent } from './news/news.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    FileUploadComponent
+    FileUploadComponent,
+    NewsComponent
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule,
     AppRoutingModule, //Добавление AppRoutingModule для роутов
     HttpClientModule, // Добавление HttpClientModule в список импортируемых модулей
     ReactiveFormsModule

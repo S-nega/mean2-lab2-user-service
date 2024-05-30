@@ -1,18 +1,45 @@
-<h2>File Upload</h2>
+<div class="container" style="margin: 20px 10% 0 10%; width: 80%; justify-content: center;">
+  
+  <div style="display: flex; flex-wrap: nowrap; justify-content: space-between;">
+    <div style="display: flex; justify-content: left;">
+      <a routerLink="/user-list"class="btn btn-primary" style="margin-right: 20px;">Users List</a>
+      <a routerLink="/news" class="btn btn-primary" style="margin-right: 20px;">News</a>
+    </div>
+  
+    <br>
+    <br>
+  
+    <div style="display: flex; justify-content: right;">
+      <div *ngIf="(!isUserAuth())">
+        <a href="auth-user" class="btn btn-primary" style="margin-right: 20px;"> Auth </a>
+        <a href="add-user" class="btn btn-primary"> Registrate </a>
+      </div>
+      <div *ngIf="(isUserAuth())">
+        <button *ngIf="(isUserAuth())" (click)="logout()" class="btn btn-primary"> Log Out </button>
+      </div>
+    </div>
 
-<form (submit)="onSubmit()" enctype="multipart/form-data">
-  <input type="file" (change)="onFileSelected($event)" #fileInput>
-  <button type="submit">Upload</button>
-</form>
+  </div>
+  <br>
+  
+  <h2>File Upload</h2>
 
-<div *ngIf="message">{{ message }}</div>
+  <br>
+  
+  <form (submit)="onSubmit()" enctype="multipart/form-data">
+    <input type="file" (change)="onFileSelected($event)" #fileInput>
+    <button type="submit">Upload</button>
+  </form>
 
-<br>
-<br>
-<h2>Uploaded Files</h2>
-<ul>
-    <li *ngFor="let file of files">
-    {{ file.Key }}
-    <button (click)="deleteFile(file.Key)">Delete</button>
-  </li>
-</ul>
+  <div *ngIf="message">{{ message }}</div>
+
+  <br>
+  <br>
+  <h2>Uploaded Files</h2>
+  <ul>
+      <li *ngFor="let file of files">
+      {{ file.Key }}
+      <button (click)="deleteFile(file.Key)">Delete</button>
+    </li>
+  </ul>
+</div>
