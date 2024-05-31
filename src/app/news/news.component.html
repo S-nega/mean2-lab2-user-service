@@ -1,5 +1,5 @@
+
 <div class="container" style="margin: 20px 10% 0 10%; width: 80%; justify-content: center;">
-  
   <div style="display: flex; flex-wrap: nowrap; justify-content: space-between;">
     <div style="display: flex; justify-content: left;">
       <a routerLink="/user-list" class="btn btn-primary" style="margin-right: 20px;">Users List</a>
@@ -15,37 +15,30 @@
         <a href="add-user" class="btn btn-primary"> Registrate </a>
       </div>
       <div *ngIf="(isUserAuth())">
-        <button *ngIf="(isUserAuth())" (click)="logout()" class="btn btn-primary"> Log Out </button>
+        <button *ngIf="(isUserAuth())" (click)="logout()" class="btn btn-primary" style="margin-right: 20px;"> Log Out </button>
       </div>
     </div>
 
   </div>
-  <br>
   
   <h2>News</h2>
-  
-    <form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
+
+  <form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
-        <label for="city">Search by keywords:</label>
-        <input type="text" class="form-control" id="city" formControlName="city" placeholder="Search">
+        <label for="keyword">Search by keywords:</label>
+        <input type="text" class="form-control" id="keyword" formControlName="keyword" placeholder="Search" style="width: 90%;">
       </div>
       <br>
       <button type="submit" class="btn btn-primary" [disabled]="!searchForm.valid">Search</button>
     </form>
     <br>
   
-    <div class="info" style="display: flex"; >
-      <div style="display: block; width: 300px;">
-        <h2>{{articles.name}}</h2>
-        <h3>{{articles.author}}</h3>  
-      </div>
-      <div style="display: block; width: 300px;">
-        <p style="margin-top: 19px; margin-bottom: 0;">
-          {{articles.description}}
-        </p>
-        <!-- <p style="margin-top: 19px; margin-bottom: 0;">
-          Feels like {{weatherData.main.feels_like}} °C
-        </p>  -->
+    <div class="info" style="display: flex; border: #777 solid 1.5px; border-radius: 10px; padding: 20px 20px 0 20px; margin-bottom: 20px;" *ngFor="let article of articles; trackBy: trackByFn">
+      <div style="display: block;">
+        <h2>{{ article.title }}</h2>
+        <p>{{ article.description }}</p>
+        <p>Author: {{ article.author }}</p>
+        <p>Published At: {{ article.publishedAt }}</p>
       </div>
     </div>
   </div>

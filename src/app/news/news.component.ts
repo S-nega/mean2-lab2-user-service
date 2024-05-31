@@ -3,6 +3,7 @@ import { UserService } from '../user.service';
 import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-news',
@@ -10,10 +11,10 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   styleUrls: ['./news.component.css']
 })
 export class NewsComponent {
-  myCity: string='.';
+  mykeyword: string='.';
   data: any;
   // articles: any;
-  articles: any;
+  articles: any[] = [];
   searchForm: FormGroup
 
   constructor(  
@@ -21,49 +22,47 @@ export class NewsComponent {
     private formBuilder: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
+    private http: HttpClient,
   ) {
     this.searchForm = this.formBuilder.group({
-      city: [''],
+      keyword: [''],
     })
   }
+
   ngOnInit(): void {
-    console.log("on init")
-    this.route.paramMap.subscribe(params => {
-      const searchCity = params.get('city'); 
+    this.loadNews();
+  }
 
-    if (searchCity){
-      this.myCity = searchCity;
-    }
-    console.log("city = " + searchCity + " = " + this.myCity)
-
-    this.userService.getNews(this.myCity).subscribe(data => {
-      this.articles = data;
-      // console.log("My Data = " + data);
-      // console.log('Weather Data:', this.weatherData);
-    }, error => {
-      console.error('Error fetching data:', error);
-    });
-    })
+  loadNews(): void {
+    this.http.get<any>('http://localhost:3000/api/news/news/a').subscribe(
+      (data) => {
+        this.articles = data.articles || [];
+        console.log('Articles:', this.articles); // Проверьте данные в консоли
+      },
+      (error) => {
+        console.error('Error fetching data:', error);
+      }
+    );
   }
 
   onSubmit(): void {
-    if (this.searchForm.valid){
-      console.log("on submit");
-      this.myCity = this.searchForm.value.city;
-      this.userService.getNews(this.myCity).subscribe(
-        data => {
-          console.log('User added successfully:', data);//данные не приходят
+    const keyword = this.searchForm.get('keyword')?.value;
+    if (keyword) {
+      this.http.get<any>(`http://localhost:3000/api/news/news/${keyword}`).subscribe(
+        (data) => {
+          this.articles = data.articles || [];
+          console.log('Articles:', this.articles); // Проверьте данные в консоли
         },
-        error => {
-          console.error('Error adding user:', error);//=>срабатывает ошибка
-          this.router.navigate(['/error']);
+        (error) => {
+          console.error('Error fetching data:', error);
         }
       );
-      this.router.navigate(['/news/' + this.myCity]);
-
     }
   }
 
+  trackByFn(index: number, article: any): any {
+    return article.id; // Или другое уникальное поле, по которому можно идентифицировать элемент
+  }
 
   
   logout(): void{

@@ -62,7 +62,7 @@ export class UserService {
   //   );
   // }
 
-  // //registration
+  //
   // addTask(task: any): Observable<any> {
   //   return this.http.post<any>(`${this.tasksUrl}/add`, task).pipe(
   //     catchError(
