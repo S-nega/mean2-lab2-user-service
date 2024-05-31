@@ -7,6 +7,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { AuthInterceptor } from './auth.interceptor';
 import { FileUploadComponent } from './file-upload/file-upload.component';
 import { NewsComponent } from './news/news.component';
+// import { GraphQLModule } from './graphql.module';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { NewsComponent } from './news/news.component';
     BrowserModule,
     AppRoutingModule, //Добавление AppRoutingModule для роутов
     HttpClientModule, // Добавление HttpClientModule в список импортируемых модулей
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    // GraphQLModule
   ],
   providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }],
   bootstrap: [AppComponent]

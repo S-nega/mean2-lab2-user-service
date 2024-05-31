@@ -20,13 +20,13 @@
     </div>
 
   </div>
-  
+  <br>
   <h2>News</h2>
 
   <form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
         <label for="keyword">Search by keywords:</label>
-        <input type="text" class="form-control" id="keyword" formControlName="keyword" placeholder="Search" style="width: 90%;">
+        <input type="text" class="form-control" id="keyword" formControlName="keyword" placeholder="Search">
       </div>
       <br>
       <button type="submit" class="btn btn-primary" [disabled]="!searchForm.valid">Search</button>

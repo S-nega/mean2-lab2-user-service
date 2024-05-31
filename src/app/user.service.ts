@@ -3,6 +3,7 @@ import { HttpClient,  HttpHeaders } from '@angular/common/http';
 import { tap, map, catchError } from 'rxjs/operators';
 import { Observable, throwError } from 'rxjs';
 import { Router } from '@angular/router';
+import gql from 'graphql-tag';
 
 @Injectable({
   providedIn: 'root'

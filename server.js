@@ -9,7 +9,6 @@ const bodyParser = require('body-parser');
 const socketIo = require('socket.io');
 const redis = require('redis');
 
-
 //links
 const Users = require('./models/users.js');
 const authMiddleware = require('./middleware/authMiddleware.js');
@@ -17,7 +16,6 @@ const dataMiddleware = require('./middleware/dataMiddleware.js');
 
 //router
 const newsRouter = require('./routes/news')
-// const usersRouter = require('./routes/users')
 
 //cache
 const Memcached = require('memcached');
@@ -28,8 +26,9 @@ const multer = require('multer');
 const aws = require('aws-sdk');
 const dotenv = require('dotenv');
 const fs = require('fs');
-// const { Storage } = require('@google-cloud/storage');
 const { sendEmail } = require('./utils/emailModul.js');
+const { ApolloServer, gql } = require('apollo-server-express');
+const { typeDefs, resolvers } = require('./graphql/newsSchema.js');
 
 dotenv.config();
 
@@ -69,41 +68,6 @@ io.on('connection', socket => {
   });
 });
 
-// //apollo, graphQL
-// const { ApolloServer, gql } = require('apollo-server-express');
-// const typeDefs = gql`
-//   type Query {
-//     getWeatherByCityName(cityName: String!): Weather
-//   }
-
-//   type Weather {
-//     cityName: String!
-//     temperature: Float!
-//     description: String!
-//   }
-// `;
-
-// const resolvers = {
-//   Query: {
-//     getWeatherByCityName: async (_, { cityName }) => {
-//       try {
-//         console.log("server.js resolves");
-//         const API_KEY = 'a3a57c49760152eb5e48acf5527cc76c'
-//         const response = await axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${API_KEY}&units=metric`);
-//         const weatherData = response.data;
-//         return {
-//           cityName: weatherData.name,
-//           temperature: weatherData.main.temp,
-//           description: weatherData.weather[0].description,
-//         };
-//       } catch (error) {
-//         console.error('Error fetching weather data:', error);
-//         // throw new Error('Failed to fetch weather data');
-//       }
-//     },
-//   },
-// };
-
 
 //mongoose connecting
 mongoose.
@@ -113,29 +77,6 @@ console.log('connected to MongoDB')
   }).catch((error) => {
     console.log(error)
 })
-
-//port connection
-app.listen(3000, ()=>{
-  console.log('listen port 3000')
-});
-
-// async function startApolloServer() {
-//   console.log("Apolloserver");
-//   const server = new ApolloServer({ typeDefs, resolvers });
-//   await server.start();
-
-//   server.applyMiddleware({ app });
-
-//   const PORT = process.env.PORT || 4000;
-//   app.listen(PORT, () => {
-//     console.log(`Server running at http://localhost:${PORT}${server.graphqlPath}`);
-//   });
-// }
-
-// startApolloServer();
-
-///////////////////////////////////////////////////////////////////////////////////////////////
-
 
 //file downloading
 app.post('/upload', upload.single('file'), async (req, res) => {
@@ -296,23 +237,6 @@ app.post('/api/users/auth', async(req, res) => {
   }
 })
 
-//add user to friend
-app.post('/api/users/addFriend/:currentUserId/:friendId', dataMiddleware, async(req, res) => {
-  try{
-    const {currentUserId} = req.params.currentUserId;
-    const {friendId} = req.params.friendId;
-    const user = await Users.findByIdAndUpdate(currentUserId, friendId);
-      
-    console.log(user);
-    await Users.updateOne({ email: email }, { $set: { failedLoginAttempts: 0 } });
-    res.send('Friend added successfully');
-  } catch (error){
-      console.error(error)
-      // return throwError(error.error.message);
-      return res.status(500).json({message: error.message});
-  }
-})
-
 //add new user / registration
 app.post('/api/users/reg', dataMiddleware, async(req, res) => {
   try{
@@ -332,7 +256,7 @@ app.post('/api/users/reg', dataMiddleware, async(req, res) => {
   }
 })
 
-//update user
+//update user / edit
 app.post('/api/users/update/:id', authMiddleware, async(req, res) => {
   try {
       const {id} = req.params;
@@ -367,4 +291,25 @@ try{
 }
 })
 
+async function startApolloServer() {
+  const apolloServer = new ApolloServer({
+    typeDefs,
+    resolvers,
+    context: ({ req }) => {
+      // Можно передавать любые данные в контексте, если требуется
+    }
+  });
+
+  await apolloServer.start();
+  apolloServer.applyMiddleware({ app });
+
+  // Запуск сервера
+  const PORT = process.env.PORT || 3000;
+  server.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`GraphQL server running at http://localhost:${PORT}${apolloServer.graphqlPath}`);
+  });
+}
+
+startApolloServer();
 module.exports = app;
