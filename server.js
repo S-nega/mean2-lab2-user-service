@@ -159,7 +159,7 @@ app.get('/upload', async (req, res) => {
 //get all users
 app.get('/api/users', async(req, res)=>{
   try{
-    const users = await Users.find({});
+    const users = await Users.find({}).select('name age');
     res.json(users);
   } catch (error){
     console.log(error)
@@ -170,14 +170,12 @@ app.get('/api/users', async(req, res)=>{
 //get one user
 app.get('/api/users/:id', async(req, res) => {
   try {
-      const {id} = req.params;
-      // getCachedData(id, )
-      const user = await Users.findById(id);
-      console.log(user);
-      res.status(200).json(user);
-
+    const {id} = req.params;
+    const user = await Users.findById(id).select('name age email password');
+    // console.log(user);
+    res.status(200).json(user);
   } catch (error) {
-      res.status(500).json({message: error.message});
+    res.status(500).json({message: error.message});
   }
 })
 
@@ -187,12 +185,11 @@ app.post('/api/users/auth', async(req, res) => {
       const email = req.body.email;
       const pass = req.body.password;
       const user = await Users.findOne({email: email});
-      console.log(Date.now());
-      console.log("lockUntil " + user.lockUntil);
+      // console.log(Date.now());
+      // console.log("lockUntil " + user.lockUntil);
 
       if (user){
         // Проверка на количество попыток ввода пароля
-
         if (user.lockUntil && user.lockUntil > Date.now()) {
           // Аккаунт заблокирован, показать сообщение об этом
           console.log('Account locked. Try again later. ' + user.lockUntil)
@@ -204,13 +201,14 @@ app.post('/api/users/auth', async(req, res) => {
 
         if (user.failedLoginAttempts >= MAX_FAILED_ATTEMPTS && user.lockUntil < Date.now()) {
           console.log('Too many failed login attempts. Account locked.')
-          await Users.updateOne({ email: email }, { $set: { lockUntil: Date.now() + 60 * 1000 } });
-          await Users.updateOne({ email: email }, { $set: { failedLoginAttempts: 4 } });
+          await Users.updateOne(
+            { email: email },
+            { $set: { lockUntil: Date.now() + 60 * 1000, failedLoginAttempts: 4 } }
+          );
           // console.log(user);
           return res.status(401).json({ message: 'Too many failed login attempts. Account locked.' });
         }
         
-
         // Проверка пароля
         if(user.password === pass){
           // Сброс счетчика неудачных попыток
@@ -232,8 +230,8 @@ app.post('/api/users/auth', async(req, res) => {
       }
 
   } catch (error){
-      console.log(error);
-      res.status(500).json({message: error.message});
+    console.log(error);
+    res.status(500).json({message: error.message});
   }
 })
 
@@ -241,12 +239,9 @@ app.post('/api/users/auth', async(req, res) => {
 app.post('/api/users/reg', dataMiddleware, async(req, res) => {
   try{
       const user = await Users.create(req.body)
-      
-      console.log(user);
+      // console.log(user);
       const email = req.body.email;
-      
       await Users.updateOne({ email: email }, { $set: { failedLoginAttempts: 0 } });
-
       await sendEmail(email, 'Registration Successful', 'You have successfully registered.');
       // res.send('User registered successfully');
   } catch (error){
@@ -259,17 +254,14 @@ app.post('/api/users/reg', dataMiddleware, async(req, res) => {
 //update user / edit
 app.post('/api/users/update/:id', authMiddleware, async(req, res) => {
   try {
-      const {id} = req.params;
-      const user = await Users.findByIdAndUpdate(id, req.body);
-      console.log("update user/ post")
-      console.log(user);
-      if(!user){
-          return res.status(404).json({message: `cannot find any user with ID ${id}`})
-      }
+    const {id} = req.params;
+    const user = await Users.findByIdAndUpdate(id, req.body);
+    console.log(user);
 
-      const updatedUser = await Users.findById(id);
-      console.log(updatedUser);
-      res.status(200).send({user: updatedUser})
+    if(!user){
+      return res.status(404).json({message: `cannot find any user with ID ${id}`})
+    }
+    res.status(200).send({user: user})
   } catch (error) {
       res.status(500).json({message: error.message});
   }
@@ -277,7 +269,7 @@ app.post('/api/users/update/:id', authMiddleware, async(req, res) => {
 
 //delete user
 app.delete('/api/users/del/:id', authMiddleware, async(req, res) => {
-try{
+  try{
     const {id} = req.params;
     const user = await Users.findByIdAndDelete(id);
     console.log(user);
@@ -286,11 +278,13 @@ try{
     }
     res.status(200).send({user: user})
 
-} catch (error){
-    res.status(500).json({message: error.message});
-}
-})
+    } catch (error){
+      res.status(500).json({message: error.message});
+    }
+  })
 
+
+//apollo server
 async function startApolloServer() {
   const apolloServer = new ApolloServer({
     typeDefs,

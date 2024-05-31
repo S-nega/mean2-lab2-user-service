@@ -30,7 +30,7 @@
     <a href="user/{{user._id}}"><strong>Name:</strong> {{ user.name }}</a>
     
     <p>Age:{{ user.age }}</p>
-    <p>Email:{{ user.email }}</p>
+    <!-- <p>Email:{{ user.email }}</p> -->
 
     <div *ngIf="(getCurrentUserId() == user._id)">
       <a href="edit-user/{{user._id}}" class="btn btn-primary" style="margin-right: 20px;"> Edit </a>

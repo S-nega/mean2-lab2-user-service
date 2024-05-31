@@ -186,8 +186,8 @@ export class UserService {
       this.router.navigate(['/auth-user']);
       return throwError("error.error.message");//??
     }
-    console.log(user);
-    return this.http.post<any>(`${this.apiUrl}/update/${userId}`, user)
+    // console.log(user);
+    // return this.http.post<any>(`${this.apiUrl}/update/${userId}`, user)
   }
 
   deleteUser(userId: string): Observable <any> {

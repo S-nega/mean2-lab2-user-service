@@ -48,8 +48,7 @@ export class EditUserComponent {
       const userId = params.get('id'); // Получаем userId из параметров маршрута
       if (this.editUserForm.valid && userId != null){
         const userData = this.editUserForm.value;
-        this.userService.updateUser(userId, userData).subscribe(updatedUser => {
-          console.log('User updated successfully:', updatedUser);
+        this.userService.updateUser(userId, userData).subscribe(() => {
           this.router.navigate(['/user-list']);
         });
       }
