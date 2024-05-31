@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const socketIo = require('socket.io');
 const redis = require('redis');
-
+const AWS = require('aws-sdk');
 //links
 const Users = require('./models/users.js');
 const authMiddleware = require('./middleware/authMiddleware.js');
@@ -35,12 +35,6 @@ dotenv.config();
 const server = http.createServer(app);
 const io = socketIo(server);
 const MAX_FAILED_ATTEMPTS = 5;
-
-const s3 = new aws.S3({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION
-});
 
 const upload = multer({ dest: 'uploads/' });
 
@@ -78,59 +72,100 @@ console.log('connected to MongoDB')
     console.log(error)
 })
 
-//file downloading
+
+// Настройка AWS SDK
+AWS.config.update({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION // Замените на ваш регион
+});
+
+const s3 = new AWS.S3();
+
 app.post('/upload', upload.single('file'), async (req, res) => {
   const file = req.file;
-  console.log("server... ");
+  console.log("server... ", file);
 
   if (!file) {
     return res.status(400).send('No file uploaded.');
   }
 
   const fileContent = fs.readFileSync(file.path);
+  const fileExtension = path.extname(file.originalname);
+  const fileName = `${file.filename}${fileExtension}`;
+  const contentType = getContentType(fileExtension);
+  
+  console.log('File details:', {
+    fileName,
+    fileExtension,
+    contentType
+  });
 
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: file.filename,
-    Body: fileContent
+    Key: fileName, // Имя файла с расширением
+    Body: fileContent,
+    ContentType: contentType // Указание типа содержимого
   };
 
   try {
     await s3.upload(params).promise();
     fs.unlinkSync(file.path); // Удаляем временный файл
 
-    const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.amazonaws.com/${file.filename}`;
+    const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
     res.status(200).json({ message: 'File uploaded to S3.', fileUrl });
   } catch (err) {
-    console.error(err);
+    console.error('S3 upload error:', err);
     res.status(500).send('Failed to upload file to S3.');
   }
 });
 
-//file delete
+// Функция для определения типа содержимого на основе расширения файла
+const getContentType = (extension) => {
+  switch (extension.toLowerCase()) {
+    case '.html':
+      return 'text/html';
+    case '.js':
+      return 'application/javascript';
+    case '.css':
+      return 'text/css';
+    case '.json':
+      return 'application/json';
+    case '.png':
+      return 'image/png';
+    case '.jpg':
+    case '.jpeg':
+      return 'image/jpeg';
+    case '.gif':
+      return 'image/gif';
+    case '.pdf':
+      return 'application/pdf';
+    case '.txt':
+      return 'text/plain';
+    default:
+      return 'application/octet-stream';
+  }
+};
+
+// Удаление файла
 app.delete('/upload/:key', async (req, res) => {
   const { key } = req.params;
-  console.log("key = " + key);
-  // Удаление файла с сервера
-  fs.unlink(`uploads/${key}`, (err) => {
-    if (err) {
-      console.error('Failed to delete file:', err);
-      return;
-    }
-    console.log('File deleted successfully');
-  });
 
-  // Удаление файла из облачного хранилища
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: key
   };
-  await s3.deleteObject(params).promise();
 
-  res.send('File deleted.');
+  try {
+    await s3.deleteObject(params).promise();
+    res.send('File deleted from S3.');
+  } catch (err) {
+    console.error('Failed to delete file from S3:', err);
+    res.status(500).send('Failed to delete file from S3.');
+  }
 });
 
-//file get
+// Получение списка файлов
 app.get('/upload', async (req, res) => {
   try {
     const params = {
@@ -139,7 +174,6 @@ app.get('/upload', async (req, res) => {
 
     const data = await s3.listObjectsV2(params).promise();
 
-    // Преобразование объекта в массив файлов
     const files = data.Contents.map((item) => {
       return {
         Key: item.Key,
@@ -147,13 +181,14 @@ app.get('/upload', async (req, res) => {
         Size: item.Size,
       };
     });
-    // console.log("files: " + files[0].Key);
+
     res.json(files);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 
 
 //get all users
