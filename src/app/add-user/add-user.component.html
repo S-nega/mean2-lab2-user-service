@@ -12,7 +12,7 @@
   
     <div style="display: flex; justify-content: right;">
       <div *ngIf="(!isUserAuth())">
-        <a href="auth-user" class="btn btn-primary"> Auth </a>
+        <a routerLink="/auth-user" class="btn btn-primary"> Auth </a>
       </div>
       <div *ngIf="(isUserAuth())">
         <button *ngIf="(isUserAuth())" (click)="logout()" class="btn btn-primary"> Log Out </button>

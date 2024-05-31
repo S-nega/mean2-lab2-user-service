@@ -11,8 +11,8 @@
   
     <div style="display: flex; justify-content: right;">
       <div *ngIf="(!isUserAuth())">
-        <a href="auth-user" class="btn btn-primary" style="margin-right: 20px;"> Auth </a>
-        <a href="add-user" class="btn btn-primary"> Registrate </a>
+        <a routerLink="/auth-user" class="btn btn-primary" style="margin-right: 20px;"> Auth </a>
+        <a routerLink="/add-user" class="btn btn-primary"> Registrate </a>
       </div>
       <div *ngIf="(isUserAuth())">
         <button *ngIf="(isUserAuth())" (click)="logout()" class="btn btn-primary"> Log Out </button>
@@ -27,13 +27,13 @@
   
   <div class="content-item" *ngFor="let user of users" style="border: #777 solid 1.5px; border-radius: 10px; padding: 20px; padding-right: 0; margin-bottom: 20px;">
 
-    <a href="user/{{user._id}}"><strong>Name:</strong> {{ user.name }}</a>
+    <a routerLink="/user/{{user._id}}"><strong>Name:</strong> {{ user.name }}</a>
     
     <p>Age:{{ user.age }}</p>
     <!-- <p>Email:{{ user.email }}</p> -->
 
     <div *ngIf="(getCurrentUserId() == user._id)">
-      <a href="edit-user/{{user._id}}" class="btn btn-primary" style="margin-right: 20px;"> Edit </a>
+      <a routerLink="/edit-user/{{user._id}}" class="btn btn-primary" style="margin-right: 20px;"> Edit </a>
       <button type="button" (click)="onDelete(user._id)" class="btn btn-danger">Delete</button>  
     </div>
 

@@ -44,9 +44,9 @@ export class FileUploadComponent {
     }
   
     const formData = new FormData();
-    formData.append('file', this.selectedFile, this.selectedFile.name); // добавляем файл в FormData
+    formData.append('file', this.selectedFile, this.selectedFile.name);
   
-    this.http.post('http://localhost:3000/upload', formData)
+    this.userService.uploadFile(formData)
       .subscribe(
         response => {
           console.log('File uploaded successfully:', response);
@@ -57,6 +57,28 @@ export class FileUploadComponent {
         }
       );
   }
+
+  // onSubmit() {
+  //   if (!this.selectedFile) {
+  //     console.error('No file selected');
+  //     return;
+  //   }
+  
+  //   const formData = new FormData();
+  //   formData.append('file', this.selectedFile, this.selectedFile.name); // добавляем файл в FormData
+  
+  //   this.userService.uploadFile(formData)
+  //   // this.http.post('http://localhost:3000/upload', formData)
+  //     .subscribe(
+  //       response => {
+  //         console.log('File uploaded successfully:', response);
+  //         this.router.navigate(['/file-upload']);
+  //       },
+  //       error => {
+  //         console.error('Error uploading file:', error);
+  //       }
+  //     );
+  // }
   
 
   onFileSelected(event: any) {

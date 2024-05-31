@@ -46,76 +46,7 @@ export class UserService {
   getNews(city: string): Observable<any> {
     console.log("getNews");
     return this.http.get<any>(`http://localhost:3000/api/news/news/${city}`)//;//4000
-    // .pipe(
-    //   catchError(error => {
-    //     console.error(error.error.message);
-    //     return throwError(error.error.message);
-    //   })
-    // );
   }
-
-  // getTasks(): Observable<any[]> {
-  //   return this.http.get<any[]>(this.tasksUrl).pipe(
-  //     catchError(error => {
-  //       console.error(error.error.message);
-  //       return throwError(error.error.message);
-  //     })
-  //   );
-  // }
-
-  //
-  // addTask(task: any): Observable<any> {
-  //   return this.http.post<any>(`${this.tasksUrl}/add`, task).pipe(
-  //     catchError(
-  //       error => {
-  //         console.error(error.error.message);
-  //         return throwError(error.error.message);
-  //       }),
-  //     tap(response => {
-  //       // Дополнительная проверка на успешное выполнение запроса
-        
-  //       if (response.success) {
-  //         // const email = req.body.email;
-  //         // await sendEmail(email, 'Registration Successful', 'You have successfully registered.');
-  //         // res.send('User registered successfully');
-  //         // Действия при успешном выполнении
-  //         console.log('User added successfully');
-  //       }
-  //     })
-  //   );
-  // }
-
-
-  // addUserToFriend(userId: string){
-  //   if(this.getCurrentUserId() == 'null') {
-  //     this.getCurrentUserId().friends.push(userId);
-  //     await currentUser.save();
-  //   }
-  // } 
-
-  // addUserToFriend(userId: string){
-  //   if(this.getCurrentUserId() != 'null') {
-  //     return this.http.post<any>(`${this.apiUrl}/addFriend`, this.currentUserId).pipe(//, userId
-  //       catchError(
-  //         error => {
-  //           console.error(error.error.message);
-  //           return throwError(error.error.message);
-  //         })
-  //         // ,
-  //       // tap(response => {
-  //       //   // Дополнительная проверка на успешное выполнение запроса
-          
-  //       //   // if (response.success) {
-  //       //   //   // const email = req.body.email;
-  //       //   //   // await sendEmail(email, 'Registration Successful', 'You have successfully registered.');
-  //       //   //   // res.send('User registered successfully');
-  //       //   //   // Действия при успешном выполнении
-  //       //   //   console.log('Friend added successfully');
-  //       //   // }
-  //       // })
-  //     );
-  //   }
-  // }
 
   getUsers(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl).pipe(
@@ -212,23 +143,35 @@ export class UserService {
   uploadFile(file: any): Observable<any> {
     console.log("user-service: ");
     return this.http.post<any>('http://localhost:3000/upload', file).pipe(
-      catchError(
-        error => {
-          console.error(error.error.message);
-          return throwError(error.error.message);
-        }),
+      catchError(error => {
+        console.error(error.error.message);
+        return throwError(error.error.message);
+      }),
       tap(response => {
-        console.log("user-service: ");
-
-        // Дополнительная проверка на успешное выполнение запроса
-        
         if (response.success) {
-          // Действия при успешном выполнении
           console.log('file added successfully');
         }
       })
     );
   }
+  
+  // uploadFile(file: any): Observable<any> {
+  //   console.log("user-service: ");
+  //   return this.http.post<any>('http://localhost:3000/upload', file).pipe(
+  //     catchError(
+  //       error => {
+  //         console.error(error.error.message);
+  //         return throwError(error.error.message);
+  //       }),
+  //     tap(response => {
+  //       // console.log("user-service: ");
+  //       if (response.success) {
+  //         // Действия при успешном выполнении
+  //         console.log('file added successfully');
+  //       }
+  //     })
+  //   );
+  // }
 
   getFilesList(): Observable<any[]> {
     return this.http.get<any[]>('http://localhost:3000/upload').pipe(

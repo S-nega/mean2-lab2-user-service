@@ -20,6 +20,7 @@ const routes: Routes = [
   { path: 'auth-user', component: AuthUserComponent },
   { path: 'user-list', component: UserListComponent },
   { path: 'file-upload', component: FileUploadComponent },
+  { path: 'file-upload/:formData', component: FileUploadComponent },
   { path: 'users', loadChildren: () => import('./modules/usermodule').then(m => m.UserModule) },
 ];
 

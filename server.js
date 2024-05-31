@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const express = require('express');
 const app = express();
 const http = require('http');
-var path = require('path');
+const path = require('path');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const socketIo = require('socket.io');
@@ -81,6 +81,20 @@ AWS.config.update({
 });
 
 const s3 = new AWS.S3();
+// const express = require('express');
+// const app = express();
+// const cors = require('cors');
+// const multer = require('multer');
+// const fs = require('fs');
+// const path = require('path');
+// const AWS = require('aws-sdk');
+require('dotenv').config();
+
+// const upload = multer({ dest: 'uploads/' });
+// const s3 = new AWS.S3();
+
+app.use(cors());
+app.use(express.json());
 
 app.post('/upload', upload.single('file'), async (req, res) => {
   const file = req.file;
@@ -103,14 +117,14 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: fileName, // Имя файла с расширением
+    Key: fileName,
     Body: fileContent,
-    ContentType: contentType // Указание типа содержимого
+    ContentType: contentType
   };
 
   try {
     await s3.upload(params).promise();
-    fs.unlinkSync(file.path); // Удаляем временный файл
+    fs.unlinkSync(file.path);
 
     const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
     res.status(200).json({ message: 'File uploaded to S3.', fileUrl });
@@ -119,6 +133,44 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     res.status(500).send('Failed to upload file to S3.');
   }
 });
+
+// app.post('/upload', upload.single('file'), async (req, res) => {
+//   const file = req.file;
+//   console.log("server... ", file);
+
+//   if (!file) {
+//     return res.status(400).send('No file uploaded.');
+//   }
+
+//   const fileContent = fs.readFileSync(file.path);
+//   const fileExtension = path.extname(file.originalname);
+//   const fileName = `${file.filename}${fileExtension}`;
+//   const contentType = getContentType(fileExtension);
+  
+//   console.log('File details:', {
+//     fileName,
+//     fileExtension,
+//     contentType
+//   });
+
+//   const params = {
+//     Bucket: process.env.AWS_BUCKET_NAME,
+//     Key: fileName, // Имя файла с расширением
+//     Body: fileContent,
+//     ContentType: contentType // Указание типа содержимого
+//   };
+
+//   try {
+//     await s3.upload(params).promise();
+//     fs.unlinkSync(file.path); // Удаляем временный файл
+
+//     const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
+//     res.status(200).json({ message: 'File uploaded to S3.', fileUrl });
+//   } catch (err) {
+//     console.error('S3 upload error:', err);
+//     res.status(500).send('Failed to upload file to S3.');
+//   }
+// });
 
 // Функция для определения типа содержимого на основе расширения файла
 const getContentType = (extension) => {

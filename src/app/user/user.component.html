@@ -2,9 +2,9 @@
   
   <div style="display: flex; flex-wrap: nowrap; justify-content: space-between;">
     <div style="display: flex; justify-content: left;">
-      <a href="user-list" class="btn btn-primary" style="margin-right: 20px;"> Back to user list </a>
-      <a href="/file-upload"class="btn btn-primary" style="margin-right: 20px;">File Upload</a>
-      <a href="/news" class="btn btn-primary" style="margin-right: 20px;">News</a>
+      <a routerLink="/user-list" class="btn btn-primary" style="margin-right: 20px;"> Back to user list </a>
+      <a routerLink="/file-upload"class="btn btn-primary" style="margin-right: 20px;">File Upload</a>
+      <a routerLink="/news" class="btn btn-primary" style="margin-right: 20px;">News</a>
     </div>
   
     <br>
@@ -12,8 +12,8 @@
   
     <div style="display: flex; justify-content: right;">
       <div *ngIf="(!isUserAuth())">
-        <a href="auth-user" class="btn btn-primary" style="margin-right: 20px;"> Auth </a>
-        <a href="add-user" class="btn btn-primary"> Registrate </a>
+        <a routerLink="/auth-user" class="btn btn-primary" style="margin-right: 20px;"> Auth </a>
+        <a routerLink="/add-user" class="btn btn-primary"> Registrate </a>
       </div>
       <div *ngIf="(isUserAuth())">
         <button *ngIf="(isUserAuth())" (click)="logout()" class="btn btn-primary"> Log Out </button>
