@@ -66,7 +66,6 @@ io.on('connection', socket => {
   });
 });
 
-
 //mongoose connecting
 mongoose.
 connect('mongodb+srv://admin:admin@userslist.s6zf9e1.mongodb.net/?retryWrites=true&w=majority')
@@ -75,7 +74,6 @@ console.log('connected to MongoDB')
   }).catch((error) => {
     console.log(error)
 })
-
 
 // Настройка AWS SDK
 AWS.config.update({

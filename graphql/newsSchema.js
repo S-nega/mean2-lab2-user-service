@@ -24,7 +24,21 @@ const typeDefs = gql`
 const resolvers = {
   Query: {
     news: async () => {
-      // Здесь должен быть код для получения всех новостей
+      // код для получения всех новостей
+      const {keyword} = req.params;
+      console.log("keyword = " + keyword);
+      if (!keyword) {
+        return res.status(400).json({ error: 'Keyword parameter is required' });
+      }
+      try {
+        const response = await axios.get(`https://newsapi.org/v2/everything?q=${keyword}&language=en&sortBy=publishedAt&apiKey=${API_KEY}`);
+        const data = response.data;
+        console.log(data);
+        res.status(200).json(data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        res.status(500).json({ error: 'Failed to fetch data' });
+      }
       return [];
     },
     newsById: async (_, { id }) => {
