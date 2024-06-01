@@ -1,6 +1,3 @@
-// // const chai = require('chai');
-// // const chai = await import('chai');
-// // async function declaration
 // async function runTests() {
 //     const chai = await import('chai');
   
@@ -44,7 +41,6 @@
 // });
 
 //   }
-  
 //   // Вызов асинхронной функции
 //   runTests().catch(err => {
 //     console.error(err);

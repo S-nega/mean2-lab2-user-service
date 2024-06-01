@@ -47,6 +47,8 @@ app.use(bodyParser.json());
 
 app.use('/api/news', newsRouter);
 
+const s3 = new AWS.S3();
+require('dotenv').config();
 
 // Настройка обработчиков событий для WebSocket endpoint
 io.on('connection', socket => {
@@ -80,22 +82,7 @@ AWS.config.update({
   region: process.env.AWS_REGION // Замените на ваш регион
 });
 
-const s3 = new AWS.S3();
-// const express = require('express');
-// const app = express();
-// const cors = require('cors');
-// const multer = require('multer');
-// const fs = require('fs');
-// const path = require('path');
-// const AWS = require('aws-sdk');
-require('dotenv').config();
-
-// const upload = multer({ dest: 'uploads/' });
-// const s3 = new AWS.S3();
-
-app.use(cors());
-app.use(express.json());
-
+//Upload file
 app.post('/upload', upload.single('file'), async (req, res) => {
   const file = req.file;
   console.log("server... ", file);
@@ -133,44 +120,6 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     res.status(500).send('Failed to upload file to S3.');
   }
 });
-
-// app.post('/upload', upload.single('file'), async (req, res) => {
-//   const file = req.file;
-//   console.log("server... ", file);
-
-//   if (!file) {
-//     return res.status(400).send('No file uploaded.');
-//   }
-
-//   const fileContent = fs.readFileSync(file.path);
-//   const fileExtension = path.extname(file.originalname);
-//   const fileName = `${file.filename}${fileExtension}`;
-//   const contentType = getContentType(fileExtension);
-  
-//   console.log('File details:', {
-//     fileName,
-//     fileExtension,
-//     contentType
-//   });
-
-//   const params = {
-//     Bucket: process.env.AWS_BUCKET_NAME,
-//     Key: fileName, // Имя файла с расширением
-//     Body: fileContent,
-//     ContentType: contentType // Указание типа содержимого
-//   };
-
-//   try {
-//     await s3.upload(params).promise();
-//     fs.unlinkSync(file.path); // Удаляем временный файл
-
-//     const fileUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.amazonaws.com/${fileName}`;
-//     res.status(200).json({ message: 'File uploaded to S3.', fileUrl });
-//   } catch (err) {
-//     console.error('S3 upload error:', err);
-//     res.status(500).send('Failed to upload file to S3.');
-//   }
-// });
 
 // Функция для определения типа содержимого на основе расширения файла
 const getContentType = (extension) => {
@@ -241,8 +190,6 @@ app.get('/upload', async (req, res) => {
   }
 });
 
-
-
 //get all users
 app.get('/api/users', async(req, res)=>{
   try{
@@ -272,8 +219,6 @@ app.post('/api/users/auth', async(req, res) => {
       const email = req.body.email;
       const pass = req.body.password;
       const user = await Users.findOne({email: email});
-      // console.log(Date.now());
-      // console.log("lockUntil " + user.lockUntil);
 
       if (user){
         // Проверка на количество попыток ввода пароля
@@ -292,7 +237,6 @@ app.post('/api/users/auth', async(req, res) => {
             { email: email },
             { $set: { lockUntil: Date.now() + 60 * 1000, failedLoginAttempts: 4 } }
           );
-          // console.log(user);
           return res.status(401).json({ message: 'Too many failed login attempts. Account locked.' });
         }
         
@@ -300,7 +244,6 @@ app.post('/api/users/auth', async(req, res) => {
         if(user.password === pass){
           // Сброс счетчика неудачных попыток
           await Users.updateOne({ email: email }, { $set: { failedLoginAttempts: 0 } });
-
           const token = jwt.sign({ userId: user._id }, 'secret', { expiresIn: '1h' });
           const currentUserId = user.id;
           return res.status(200).json({ message: 'Logged in successfully', token, currentUserId });
@@ -326,14 +269,11 @@ app.post('/api/users/auth', async(req, res) => {
 app.post('/api/users/reg', dataMiddleware, async(req, res) => {
   try{
       const user = await Users.create(req.body)
-      // console.log(user);
       const email = req.body.email;
       await Users.updateOne({ email: email }, { $set: { failedLoginAttempts: 0 } });
       await sendEmail(email, 'Registration Successful', 'You have successfully registered.');
-      // res.send('User registered successfully');
   } catch (error){
       console.error(error)
-      // return throwError(error.error.message);
       return res.status(500).json({message: error.message});
   }
 })
@@ -368,8 +308,7 @@ app.delete('/api/users/del/:id', authMiddleware, async(req, res) => {
     } catch (error){
       res.status(500).json({message: error.message});
     }
-  })
-
+})
 
 //apollo server
 async function startApolloServer() {

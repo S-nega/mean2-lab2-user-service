@@ -3,7 +3,6 @@ import { HttpClient,  HttpHeaders } from '@angular/common/http';
 import { tap, map, catchError } from 'rxjs/operators';
 import { Observable, throwError } from 'rxjs';
 import { Router } from '@angular/router';
-import gql from 'graphql-tag';
 
 @Injectable({
   providedIn: 'root'
@@ -66,13 +65,7 @@ export class UserService {
           return throwError(error.error.message);
         }),
       tap(response => {
-        // Дополнительная проверка на успешное выполнение запроса
-        
         if (response.success) {
-          // const email = req.body.email;
-          // await sendEmail(email, 'Registration Successful', 'You have successfully registered.');
-          // res.send('User registered successfully');
-          // Действия при успешном выполнении
           console.log('User added successfully');
         }
       })
@@ -117,8 +110,6 @@ export class UserService {
       this.router.navigate(['/auth-user']);
       return throwError("error.error.message");//??
     }
-    // console.log(user);
-    // return this.http.post<any>(`${this.apiUrl}/update/${userId}`, user)
   }
 
   deleteUser(userId: string): Observable <any> {
@@ -154,24 +145,6 @@ export class UserService {
       })
     );
   }
-  
-  // uploadFile(file: any): Observable<any> {
-  //   console.log("user-service: ");
-  //   return this.http.post<any>('http://localhost:3000/upload', file).pipe(
-  //     catchError(
-  //       error => {
-  //         console.error(error.error.message);
-  //         return throwError(error.error.message);
-  //       }),
-  //     tap(response => {
-  //       // console.log("user-service: ");
-  //       if (response.success) {
-  //         // Действия при успешном выполнении
-  //         console.log('file added successfully');
-  //       }
-  //     })
-  //   );
-  // }
 
   getFilesList(): Observable<any[]> {
     return this.http.get<any[]>('http://localhost:3000/upload').pipe(

@@ -1,24 +1,24 @@
 
-# Определение второго сервиса для Express.js API
-FROM node:latest
+# # Определение второго сервиса для Express.js API
+# FROM node:latest
 
-# Устанавливаем рабочую директорию внутри контейнера для API
-WORKDIR /usr/src/app
+# # Устанавливаем рабочую директорию внутри контейнера для API
+# WORKDIR /usr/src/app
 
-# Копируем файлы package.json и package-lock.json для установки зависимостей API
-COPY package*.json ./
+# # Копируем файлы package.json и package-lock.json для установки зависимостей API
+# COPY package*.json ./
 
-# Устанавливаем зависимости API
-RUN npm install --legacy-peer-deps
+# # Устанавливаем зависимости API
+# RUN npm install --legacy-peer-deps
 
-# Копируем все файлы проекта API в рабочую директорию контейнера
-COPY . .
+# # Копируем все файлы проекта API в рабочую директорию контейнера
+# COPY . .
 
-# Определяем порт, который будет прослушивать контейнер Express.js
-EXPOSE 3000
+# # Определяем порт, который будет прослушивать контейнер Express.js
+# EXPOSE 3000
 
-# Команда для запуска Express.js приложения
-CMD ["node", "server.js"]
+# # Команда для запуска Express.js приложения
+# CMD ["node", "server.js"]
 
 # Используем официальный образ Node.js в качестве базового образа для сборки Angular приложения
 
