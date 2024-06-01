@@ -16,7 +16,7 @@ router.post('/search', (req, res) => {
     console.log("enter keyword")
     res.render('search');
   } else { 
-    res.redirect('/api/news/' + keyword);
+    res.redirect('/graphql/api/news/' + keyword);
   }
 })
 

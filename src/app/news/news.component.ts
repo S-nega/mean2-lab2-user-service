@@ -13,7 +13,6 @@ import { HttpClient } from '@angular/common/http';
 export class NewsComponent {
   mykeyword: string='.';
   data: any;
-  // articles: any;
   articles: any[] = [];
   searchForm: FormGroup
 
@@ -34,7 +33,7 @@ export class NewsComponent {
   }
 
   loadNews(): void {
-    this.http.get<any>('http://localhost:3000/api/news/news/a').subscribe(
+    this.http.get<any>('http://localhost:3000/graphql/api/news/news/a').subscribe(
       (data) => {
         this.articles = data.articles || [];
         console.log('Articles:', this.articles); // Проверьте данные в консоли
@@ -48,7 +47,7 @@ export class NewsComponent {
   onSubmit(): void {
     const keyword = this.searchForm.get('keyword')?.value;
     if (keyword) {
-      this.http.get<any>(`http://localhost:3000/api/news/news/${keyword}`).subscribe(
+      this.http.get<any>(`http://localhost:3000/graphql/api/news/news/${keyword}`).subscribe(
         (data) => {
           this.articles = data.articles || [];
           console.log('Articles:', this.articles); // Проверьте данные в консоли

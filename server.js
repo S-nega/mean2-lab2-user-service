@@ -16,6 +16,7 @@ const dataMiddleware = require('./middleware/dataMiddleware.js');
 
 //router
 const newsRouter = require('./routes/news')
+const usersRouter = require('./routes/users')
 
 //cache
 const Memcached = require('memcached');
@@ -45,7 +46,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors()); //Разрешение на cors
 app.use(bodyParser.json());
 
-app.use('/api/news', newsRouter);
+app.use('/graphql/api/news', newsRouter);
+app.use('/api/users', usersRouter);
 
 const s3 = new AWS.S3();
 require('dotenv').config();
@@ -189,29 +191,6 @@ app.get('/upload', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
-//get all users
-app.get('/api/users', async(req, res)=>{
-  try{
-    const users = await Users.find({}).select('name age');
-    res.json(users);
-  } catch (error){
-    console.log(error)
-    res.status(500).json({message: error.message});
-  }
-});
-
-//get one user
-app.get('/api/users/:id', async(req, res) => {
-  try {
-    const {id} = req.params;
-    const user = await Users.findById(id).select('name age email password');
-    // console.log(user);
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(500).json({message: error.message});
-  }
-})
 
 //authorize user
 app.post('/api/users/auth', async(req, res) => {
